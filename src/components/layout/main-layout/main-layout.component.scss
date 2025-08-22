@@ -1,0 +1,30 @@
+@use "../../../styles" as s;
+
+
+.main-layout {
+  display: flex;
+  height: 100vh;
+  background-color: s.$gray-50;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+  display: flex;
+  flex-direction: column;
+  
+  @include s.mobile {
+    margin-left: 0;
+  }
+}
+
+.content-area {
+  flex: 1;
+  padding: s.$spacing-lg;
+  margin-top: 64px;
+  overflow-y: auto;
+  
+  @include s.mobile {
+    padding: s.$spacing-md;
+  }
+}

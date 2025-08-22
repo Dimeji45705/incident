@@ -1,0 +1,104 @@
+@use "../../../styles" as s;
+
+.user-list {
+  .page-header {
+    @include s.flex-between;
+    margin-bottom: s.$spacing-lg;
+
+    @include s.mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: s.$spacing-md;
+    }
+
+    .page-title {
+      font-size: s.$font-size-2xl;
+      font-weight: s.$font-weight-bold;
+      color: s.$gray-900;
+      margin: 0;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+
+    .table {
+      min-width: 1000px;
+    }
+  }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: s.$spacing-xs s.$spacing-sm;
+    border-radius: s.$border-radius-sm;
+    font-size: s.$font-size-xs;
+    font-weight: s.$font-weight-medium;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+
+    &.role-admin {
+      background-color: rgba(s.$error-color, 0.1);
+      color: s.$error-color;
+    }
+
+    &.role-supervisor {
+      background-color: rgba(s.$warning-color, 0.1);
+      color: s.$warning-color;
+    }
+
+    &.role-user {
+      background-color: rgba(s.$info-color, 0.1);
+      color: s.$info-color;
+    }
+  }
+
+  .status-active {
+    background-color: rgba(s.$success-color, 0.1);
+    color: s.$success-color;
+  }
+
+  .status-inactive {
+    background-color: rgba(s.$gray-500, 0.1);
+    color: s.$gray-500;
+  }
+
+  .departments {
+    font-size: s.$font-size-sm;
+    color: s.$gray-700;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: s.$spacing-sm;
+
+    .btn-sm {
+      padding: s.$spacing-xs s.$spacing-sm;
+      font-size: s.$font-size-xs;
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: s.$spacing-3xl;
+    color: s.$gray-500;
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto s.$spacing-lg;
+      color: s.$gray-300;
+    }
+
+    h3 {
+      font-size: s.$font-size-lg;
+      font-weight: s.$font-weight-semibold;
+      color: s.$gray-700;
+      margin-bottom: s.$spacing-sm;
+    }
+
+    p {
+      margin-bottom: s.$spacing-lg;
+    }
+  }
+}

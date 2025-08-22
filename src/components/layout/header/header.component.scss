@@ -1,0 +1,96 @@
+@use "../../../styles" as s;
+
+
+.header {
+  height: 64px;
+  background-color: s.$white;
+  border-bottom: 1px solid s.$gray-200;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  z-index: s.$z-sticky;
+  
+  @include s.mobile {
+    left: 0;
+  }
+}
+
+.header-content {
+  height: 100%;
+  padding: 0 s.$spacing-lg;
+  @include s.flex-between;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  padding: s.$spacing-sm;
+  cursor: pointer;
+  color: s.$gray-600;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  @include s.mobile {
+    display: block;
+  }
+}
+
+.header-title {
+  flex: 1;
+  
+  h1 {
+    font-size: s.$font-size-xl;
+    font-weight: s.$font-weight-semibold;
+    color: s.$gray-900;
+    margin: 0;
+    
+    @include s.mobile {
+      font-size: s.$font-size-lg;
+      margin-left: s.$spacing-md;
+    }
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: s.$spacing-sm;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: s.$primary-color;
+  color: s.$secondary-color;
+  @include s.flex-center;
+  font-size: s.$font-size-sm;
+  font-weight: s.$font-weight-medium;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  
+  @include s.mobile {
+    display: none;
+  }
+  
+  .user-name {
+    font-size: s.$font-size-sm;
+    font-weight: s.$font-weight-medium;
+    color: s.$gray-900;
+    line-height: s.$line-height-tight;
+  }
+  
+  .user-role {
+    font-size: s.$font-size-xs;
+    color: s.$gray-500;
+    line-height: s.$line-height-tight;
+  }
+}

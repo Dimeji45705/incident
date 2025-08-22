@@ -1,0 +1,216 @@
+@use '../../../styles' as s;
+
+.change-request-detail {
+  .page-header {
+    @include s.flex-between;
+    margin-bottom: s.$spacing-lg;
+    
+    @include s.mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: s.$spacing-md;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: s.$spacing-md;
+      
+      .page-title {
+        font-size: s.$font-size-xl;
+        font-weight: s.$font-weight-bold;
+        color: s.$gray-900;
+        margin: 0;
+        
+        @include s.mobile {
+          font-size: s.$font-size-lg;
+        }
+      }
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: s.$spacing-sm;
+      
+      @include s.mobile {
+        flex-wrap: wrap;
+      }
+    }
+  }
+  
+  .change-request-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: s.$spacing-lg;
+    
+    @include s.mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .change-request-main {
+    display: flex;
+    flex-direction: column;
+    gap: s.$spacing-lg;
+  }
+  
+  .cr-info {
+    padding: s.$spacing-xl;
+    
+    .section-title {
+      font-size: s.$font-size-lg;
+      font-weight: s.$font-weight-semibold;
+      color: s.$gray-900;
+      margin: 0 0 s.$spacing-lg 0;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: s.$spacing-lg;
+      margin-bottom: s.$spacing-xl;
+      
+      .info-item {
+        label {
+          display: block;
+          font-size: s.$font-size-sm;
+          font-weight: s.$font-weight-medium;
+          color: s.$gray-500;
+          margin-bottom: s.$spacing-xs;
+        }
+        
+        span {
+          font-size: s.$font-size-sm;
+          color: s.$gray-900;
+        }
+      }
+    }
+    
+    .description-section {
+      h3 {
+        font-size: s.$font-size-md;
+        font-weight: s.$font-weight-semibold;
+        color: s.$gray-900;
+        margin: 0 0 s.$spacing-md 0;
+      }
+      
+      .description {
+        color: s.$gray-700;
+        line-height: s.$line-height-relaxed;
+        margin: 0;
+      }
+    }
+  }
+  
+  .details-section {
+    padding: s.$spacing-xl;
+    
+    .section-title {
+      font-size: s.$font-size-lg;
+      font-weight: s.$font-weight-semibold;
+      color: s.$gray-900;
+      margin: 0 0 s.$spacing-lg 0;
+    }
+    
+    .detail-item {
+      margin-bottom: s.$spacing-lg;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      h3 {
+        font-size: s.$font-size-md;
+        font-weight: s.$font-weight-semibold;
+        color: s.$gray-900;
+        margin: 0 0 s.$spacing-sm 0;
+      }
+      
+      p {
+        color: s.$gray-700;
+        line-height: s.$line-height-relaxed;
+        margin: 0;
+      }
+    }
+  }
+  
+  .change-request-sidebar {
+    .timeline-section {
+      padding: s.$spacing-lg;
+      
+      .section-title {
+        font-size: s.$font-size-md;
+        font-weight: s.$font-weight-semibold;
+        color: s.$gray-900;
+        margin: 0 0 s.$spacing-md 0;
+      }
+      
+      .timeline {
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          left: 8px;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background-color: s.$gray-200;
+        }
+        
+        .timeline-item {
+          position: relative;
+          padding-left: s.$spacing-lg;
+          margin-bottom: s.$spacing-md;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid s.$white;
+            
+            &.created {
+              background-color: s.$info-color;
+            }
+            
+            &.approved {
+              background-color: s.$success-color;
+            }
+            
+            &.completed {
+              background-color: s.$primary-color;
+            }
+          }
+          
+          .timeline-content {
+            display: flex;
+            flex-direction: column;
+            
+            .timeline-title {
+              font-size: s.$font-size-sm;
+              font-weight: s.$font-weight-medium;
+              color: s.$gray-900;
+            }
+            
+            .timeline-date {
+              font-size: s.$font-size-xs;
+              color: s.$gray-500;
+            }
+            
+            .timeline-user {
+              font-size: s.$font-size-xs;
+              color: s.$gray-500;
+            }
+          }
+        }
+      }
+    }
+  }
+}

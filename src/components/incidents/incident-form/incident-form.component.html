@@ -1,0 +1,76 @@
+<div class="incident-form">
+  <div class="page-header">
+    <h1 class="page-title">Create Incident</h1>
+  </div>
+  
+  <div class="card">
+    <form (ngSubmit)="onSubmit()" class="form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="title" class="form-label">Title *</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            [(ngModel)]="incident.title"
+            class="form-input"
+            placeholder="Enter incident title"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="severity" class="form-label">Severity *</label>
+          <select
+            id="severity"
+            name="severity"
+            [(ngModel)]="incident.severity"
+            class="form-input"
+            required
+          >
+            <option value="">Select severity</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="department" class="form-label">Department *</label>
+          <select
+            id="department"
+            name="department"
+            [(ngModel)]="incident.department"
+            class="form-input"
+            required
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="description" class="form-label">Description *</label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="incident.description"
+          class="form-input"
+          rows="6"
+          placeholder="Describe the incident in detail..."
+          required
+        ></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" (click)="cancel()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting">Creating...</span>
+          <span *ngIf="!isSubmitting">Create Incident</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

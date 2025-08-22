@@ -1,0 +1,98 @@
+<div class="change-request-form">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEdit ? 'Edit' : 'Create' }} Change Request</h1>
+  </div>
+  
+  <div class="card">
+    <form (ngSubmit)="onSubmit()" class="form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="title" class="form-label">Title *</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            [(ngModel)]="changeRequest.title"
+            class="form-input"
+            placeholder="Enter change request title"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="department" class="form-label">Department *</label>
+          <select
+            id="department"
+            name="department"
+            [(ngModel)]="changeRequest.department"
+            class="form-input"
+            required
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="description" class="form-label">Description *</label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="changeRequest.description"
+          class="form-input"
+          rows="4"
+          placeholder="Describe the change request in detail..."
+          required
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="justification" class="form-label">Justification *</label>
+        <textarea
+          id="justification"
+          name="justification"
+          [(ngModel)]="changeRequest.justification"
+          class="form-input"
+          rows="3"
+          placeholder="Explain why this change is necessary..."
+          required
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="impact" class="form-label">Impact Assessment *</label>
+        <textarea
+          id="impact"
+          name="impact"
+          [(ngModel)]="changeRequest.impact"
+          class="form-input"
+          rows="3"
+          placeholder="Describe the expected impact of this change..."
+          required
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="rollbackPlan" class="form-label">Rollback Plan *</label>
+        <textarea
+          id="rollbackPlan"
+          name="rollbackPlan"
+          [(ngModel)]="changeRequest.rollbackPlan"
+          class="form-input"
+          rows="3"
+          placeholder="Describe how to rollback if issues occur..."
+          required
+        ></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" (click)="cancel()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting">{{ isEdit ? 'Updating...' : 'Creating...' }}</span>
+          <span *ngIf="!isSubmitting">{{ isEdit ? 'Update' : 'Create' }} Change Request</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

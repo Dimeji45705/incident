@@ -1,0 +1,103 @@
+<div class="user-form">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEdit ? 'Edit' : 'Create' }} User</h1>
+  </div>
+  
+  <div class="card">
+    <form (ngSubmit)="onSubmit()" class="form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="name" class="form-label">Full Name *</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            [(ngModel)]="user.name"
+            class="form-input"
+            placeholder="Enter full name"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address *</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="user.email"
+            class="form-input"
+            placeholder="Enter email address"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="role" class="form-label">Role *</label>
+          <select
+            id="role"
+            name="role"
+            [(ngModel)]="user.role"
+            class="form-input"
+            required
+          >
+            <option value="">Select role</option>
+            <option value="user">User</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="primaryDepartment" class="form-label">Primary Department *</label>
+          <select
+            id="primaryDepartment"
+            name="primaryDepartment"
+            [(ngModel)]="user.primaryDepartment"
+            class="form-input"
+            required
+          >
+            <option value="">Select department</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Additional Departments</label>
+        <div class="checkbox-group">
+          <label *ngFor="let dept of departments" class="checkbox-item">
+            <input
+              type="checkbox"
+              [value]="dept"
+              [checked]="user.additionalDepartments.includes(dept)"
+              (change)="onDepartmentChange(dept, $event)"
+              class="checkbox-input"
+            />
+            <span class="checkbox-label">{{ dept }}</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="checkbox-item supervisor-checkbox">
+          <input
+            type="checkbox"
+            [(ngModel)]="user.isSupervisor"
+            name="isSupervisor"
+            class="checkbox-input"
+          />
+          <span class="checkbox-label">Is Supervisor</span>
+        </label>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" (click)="cancel()" class="btn-secondary">Cancel</button>
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting">{{ isEdit ? 'Updating...' : 'Creating...' }}</span>
+          <span *ngIf="!isSubmitting">{{ isEdit ? 'Update' : 'Create' }} User</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

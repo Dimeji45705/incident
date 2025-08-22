@@ -1,0 +1,261 @@
+@use 'styles' as s;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: s.$font-family-base;
+  font-size: s.$font-size-base;
+  line-height: s.$line-height-normal;
+  color: s.$gray-900;
+  background-color: s.$gray-50;
+}
+
+/* Utility Classes */
+.btn-primary {
+  @include s.button-primary;
+}
+
+.btn-secondary {
+  @include s.button-secondary;
+}
+
+.btn-success {
+  @include s.button-success;
+}
+
+.btn-warning {
+  @include s.button-warning;
+}
+
+.btn-danger {
+  @include s.button-danger;
+}
+
+.card {
+  @include s.card;
+}
+
+.form-input {
+  @include s.form-input;
+}
+
+.table {
+  @include s.table-base;
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 s.$spacing-md;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: s.$spacing-sm;
+}
+
+.gap-4 {
+  gap: s.$spacing-md;
+}
+
+.gap-6 {
+  gap: s.$spacing-lg;
+}
+
+/* Spacing Utilities */
+.p-4 {
+  padding: s.$spacing-md;
+}
+
+.p-6 {
+  padding: s.$spacing-lg;
+}
+
+.px-4 {
+  padding-left: s.$spacing-md;
+  padding-right: s.$spacing-md;
+}
+
+.py-4 {
+  padding-top: s.$spacing-md;
+  padding-bottom: s.$spacing-md;
+}
+
+.m-4 {
+  margin: s.$spacing-md;
+}
+
+.mb-4 {
+  margin-bottom: s.$spacing-md;
+}
+
+.mb-6 {
+  margin-bottom: s.$spacing-lg;
+}
+
+/* Text Utilities */
+.text-sm {
+  font-size: s.$font-size-sm;
+}
+
+.text-lg {
+  font-size: s.$font-size-lg;
+}
+
+.text-xl {
+  font-size: s.$font-size-xl;
+}
+
+.text-2xl {
+  font-size: s.$font-size-2xl;
+}
+
+.font-medium {
+  font-weight: s.$font-weight-medium;
+}
+
+.font-semibold {
+  font-weight: s.$font-weight-semibold;
+}
+
+.font-bold {
+  font-weight: s.$font-weight-bold;
+}
+
+.text-gray-500 {
+  color: s.$gray-500;
+}
+
+.text-gray-700 {
+  color: s.$gray-700;
+}
+
+.text-primary {
+  color: s.$primary-color;
+}
+
+.text-success {
+  color: s.$success-color;
+}
+
+.text-warning {
+  color: s.$warning-color;
+}
+
+.text-error {
+  color: s.$error-color;
+}
+
+/* Width Utilities */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: s.$spacing-xs s.$spacing-sm;
+  border-radius: s.$border-radius-sm;
+  font-size: s.$font-size-xs;
+  font-weight: s.$font-weight-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  
+  &.status-open {
+    background-color: rgba(s.$info-color, 0.1);
+    color: s.$info-color;
+  }
+  
+  &.status-in-progress {
+    background-color: rgba(s.$warning-color, 0.1);
+    color: s.$warning-color;
+  }
+  
+  &.status-resolved {
+    background-color: rgba(s.$success-color, 0.1);
+    color: s.$success-color;
+  }
+  
+  &.status-closed {
+    background-color: rgba(s.$gray-500, 0.1);
+    color: s.$gray-500;
+  }
+  
+  &.status-pending {
+    background-color: rgba(s.$warning-color, 0.1);
+    color: s.$warning-color;
+  }
+  
+  &.status-approved {
+    background-color: rgba(s.$success-color, 0.1);
+    color: s.$success-color;
+  }
+  
+  &.status-rejected {
+    background-color: rgba(s.$error-color, 0.1);
+    color: s.$error-color;
+  }
+}
+
+/* Severity Badge Styles */
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: s.$spacing-xs s.$spacing-sm;
+  border-radius: s.$border-radius-sm;
+  font-size: s.$font-size-xs;
+  font-weight: s.$font-weight-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  
+  &.severity-low {
+    background-color: rgba(s.$success-color, 0.1);
+    color: s.$success-color;
+  }
+  
+  &.severity-medium {
+    background-color: rgba(s.$warning-color, 0.1);
+    color: s.$warning-color;
+  }
+  
+  &.severity-high {
+    background-color: rgba(s.$error-color, 0.1);
+    color: s.$error-color;
+  }
+  
+  &.severity-critical {
+    background-color: s.$error-color;
+    color: s.$white;
+  }
+}

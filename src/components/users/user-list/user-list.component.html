@@ -1,0 +1,71 @@
+<div class="user-list">
+  <div class="page-header">
+    <h1 class="page-title">Users</h1>
+    <a routerLink="/users/create" class="btn-primary">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Create User
+    </a>
+  </div>
+  
+  <div class="card">
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Primary Department</th>
+            <th>Additional Departments</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td class="font-medium">{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="role-badge" [ngClass]="'role-' + user.role">
+                {{ user.role | titlecase }}
+              </span>
+            </td>
+            <td>{{ user.primaryDepartment }}</td>
+            <td>
+              <span *ngIf="user.additionalDepartments.length > 0" class="departments">
+                {{ user.additionalDepartments.join(', ') }}
+              </span>
+              <span *ngIf="user.additionalDepartments.length === 0" class="text-gray-500">None</span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="user.isActive ? 'status-active' : 'status-inactive'">
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a [routerLink]="['/users', user.id, 'edit']" class="btn-secondary btn-sm">Edit</a>
+                <button (click)="toggleUserStatus(user)" 
+                        class="btn-sm"
+                        [ngClass]="user.isActive ? 'btn-warning' : 'btn-success'">
+                  {{ user.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div *ngIf="users.length === 0" class="empty-state">
+        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+        </svg>
+        <h3>No users found</h3>
+        <p>Get started by creating your first user.</p>
+        <a routerLink="/users/create" class="btn-primary">Create User</a>
+      </div>
+    </div>
+  </div>
+</div>

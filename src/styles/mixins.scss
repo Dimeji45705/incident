@@ -1,0 +1,180 @@
+@use 'variables' as v;
+
+// Button Mixins
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: v.$spacing-sm v.$spacing-md;
+  border: 1px solid transparent;
+  border-radius: v.$border-radius-md;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  line-height: v.$line-height-tight;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background-color: v.$primary-color;
+  color: v.$white;
+  
+  &:hover:not(:disabled) {
+    background-color: v.$primary-dark;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(v.$primary-color, 0.1);
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: v.$secondary-color;
+  color: v.$gray-900;
+  border-color: darken(v.$secondary-color, 10%);
+  
+  &:hover:not(:disabled) {
+    background-color: darken(v.$secondary-color, 5%);
+    border-color: darken(v.$secondary-color, 15%);
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(v.$secondary-color, 0.3);
+  }
+}
+
+@mixin button-success {
+  @include button-base;
+  background-color: v.$success-color;
+  color: v.$white;
+  
+  &:hover:not(:disabled) {
+    background-color: darken(v.$success-color, 10%);
+  }
+}
+
+@mixin button-warning {
+  @include button-base;
+  background-color: v.$warning-color;
+  color: v.$white;
+  
+  &:hover:not(:disabled) {
+    background-color: darken(v.$warning-color, 10%);
+  }
+}
+
+@mixin button-danger {
+  @include button-base;
+  background-color: v.$error-color;
+  color: v.$white;
+  
+  &:hover:not(:disabled) {
+    background-color: darken(v.$error-color, 10%);
+  }
+}
+
+// Card Mixin
+@mixin card {
+  background-color: v.$white;
+  border-radius: v.$border-radius-lg;
+  box-shadow: v.$shadow-sm;
+  border: 1px solid v.$gray-200;
+}
+
+// Form Input Mixin
+@mixin form-input {
+  width: 100%;
+  padding: v.$spacing-sm v.$spacing-md;
+  border: 1px solid v.$gray-300;
+  border-radius: v.$border-radius-md;
+  font-size: v.$font-size-sm;
+  line-height: v.$line-height-normal;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  
+  &:focus {
+    outline: none;
+    border-color: v.$primary-color;
+    box-shadow: 0 0 0 3px rgba(v.$primary-color, 0.1);
+  }
+  
+  &::placeholder {
+    color: v.$gray-400;
+  }
+}
+
+// Table Mixins
+@mixin table-base {
+  width: 100%;
+  border-collapse: collapse;
+  
+  th, td {
+    padding: v.$spacing-sm v.$spacing-md;
+    text-align: left;
+    border-bottom: 1px solid v.$gray-200;
+  }
+  
+  th {
+    background-color: v.$gray-50;
+    font-weight: v.$font-weight-semibold;
+    color: v.$gray-700;
+    font-size: v.$font-size-sm;
+  }
+  
+  td {
+    font-size: v.$font-size-sm;
+    color: v.$gray-900;
+  }
+  
+  tbody tr:hover {
+    background-color: v.$gray-50;
+  }
+}
+
+// Responsive Mixins
+@mixin mobile {
+  @media (max-width: #{v.$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{v.$breakpoint-md}) and (max-width: #{v.$breakpoint-lg - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{v.$breakpoint-lg}) {
+    @content;
+  }
+}
+
+// Utility Mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

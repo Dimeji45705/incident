@@ -1,0 +1,100 @@
+@use "../../../styles" as s;
+
+
+.user-form {
+  max-width: 800px;
+
+  .page-header {
+    margin-bottom: s.$spacing-lg;
+
+    .page-title {
+      font-size: s.$font-size-2xl;
+      font-weight: s.$font-weight-bold;
+      color: s.$gray-900;
+      margin: 0;
+    }
+  }
+
+  .form {
+    padding: s.$spacing-xl;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: s.$spacing-lg;
+      margin-bottom: s.$spacing-lg;
+
+      @include s.mobile {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: s.$spacing-lg;
+
+      .form-label {
+        display: block;
+        font-size: s.$font-size-sm;
+        font-weight: s.$font-weight-medium;
+        color: s.$gray-700;
+        margin-bottom: s.$spacing-sm;
+      }
+
+      .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: s.$spacing-sm;
+
+        @include s.mobile {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: s.$spacing-sm;
+        cursor: pointer;
+
+        .checkbox-input {
+          width: 16px;
+          height: 16px;
+          accent-color: s.$primary-color;
+        }
+
+        .checkbox-label {
+          font-size: s.$font-size-sm;
+          color: s.$gray-700;
+          user-select: none;
+        }
+
+        &:hover .checkbox-label {
+          color: s.$gray-900;
+        }
+      }
+
+      .supervisor-checkbox {
+        padding: s.$spacing-md;
+        border: 1px solid s.$gray-200;
+        border-radius: s.$border-radius-md;
+        background-color: s.$gray-50;
+
+        .checkbox-label {
+          font-weight: s.$font-weight-medium;
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: s.$spacing-md;
+      padding-top: s.$spacing-lg;
+      border-top: 1px solid s.$gray-200;
+
+      @include s.mobile {
+        flex-direction: column-reverse;
+      }
+    }
+  }
+}

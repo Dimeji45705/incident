@@ -1,0 +1,49 @@
+<div class="login-container">
+  <div class="login-card card">
+    <div class="login-header">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
+      <p class="text-gray-600">Welcome back! Please sign in to your account.</p>
+    </div>
+    
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="credentials.email"
+          class="form-input"
+          placeholder="Enter your email"
+          required
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="credentials.password"
+          class="form-input"
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn-primary w-full" [disabled]="isLoading">
+          <span *ngIf="isLoading">Signing in...</span>
+          <span *ngIf="!isLoading">Sign In</span>
+        </button>
+      </div>
+      
+      <div class="demo-credentials">
+        <p class="text-sm text-gray-600 mb-2">Demo credentials:</p>
+        <p class="text-xs text-gray-500">Admin: admin&#64;company.com / password</p>
+        <p class="text-xs text-gray-500">User: user&#64;company.com / password</p>
+      </div>
+    </form>
+  </div>
+</div>

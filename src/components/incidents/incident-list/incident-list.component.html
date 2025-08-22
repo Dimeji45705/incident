@@ -1,0 +1,61 @@
+<div class="incident-list">
+  <div class="page-header">
+    <h1 class="page-title">Incidents</h1>
+    <a routerLink="/incidents/create" class="btn-primary">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Create Incident
+    </a>
+  </div>
+  
+  <div class="card">
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Severity</th>
+            <th>Department</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let incident of incidents" (click)="viewIncident(incident.id)" class="table-row-clickable">
+            <td class="font-medium">{{ incident.number }}</td>
+            <td>{{ incident.title }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-' + incident.status">
+                {{ incident.status | titlecase }}
+              </span>
+            </td>
+            <td>
+              <span class="severity-badge" [ngClass]="'severity-' + incident.severity">
+                {{ incident.severity | titlecase }}
+              </span>
+            </td>
+            <td>{{ incident.department }}</td>
+            <td>{{ incident.createdAt | date:'short' }}</td>
+            <td>
+              <div class="action-buttons">
+                <a [routerLink]="['/incidents', incident.id]" class="btn-secondary btn-sm">View</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div *ngIf="incidents.length === 0" class="empty-state">
+        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <h3>No incidents found</h3>
+        <p>Get started by creating your first incident.</p>
+        <a routerLink="/incidents/create" class="btn-primary">Create Incident</a>
+      </div>
+    </div>
+  </div>
+</div>

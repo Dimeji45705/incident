@@ -1,0 +1,61 @@
+@use "../../../styles" as s;
+
+
+.change-request-form {
+  max-width: 800px;
+
+  .page-header {
+    margin-bottom: s.$spacing-lg;
+
+    .page-title {
+      font-size: s.$font-size-2xl;
+      font-weight: s.$font-weight-bold;
+      color: s.$gray-900;
+      margin: 0;
+    }
+  }
+
+  .form {
+    padding: s.$spacing-xl;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: s.$spacing-lg;
+      margin-bottom: s.$spacing-lg;
+
+      @include s.mobile {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: s.$spacing-lg;
+
+      .form-label {
+        display: block;
+        font-size: s.$font-size-sm;
+        font-weight: s.$font-weight-medium;
+        color: s.$gray-700;
+        margin-bottom: s.$spacing-sm;
+      }
+
+      textarea.form-input {
+        resize: vertical;
+        min-height: 80px;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: s.$spacing-md;
+      padding-top: s.$spacing-lg;
+      border-top: 1px solid s.$gray-200;
+
+      @include s.mobile {
+        flex-direction: column-reverse;
+      }
+    }
+  }
+}

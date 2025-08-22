@@ -1,0 +1,49 @@
+@use "../../styles" as s;
+
+.login-container {
+  min-height: 100vh;
+  @include s.flex-center;
+  background: linear-gradient(135deg, s.$primary-color 0%, s.$primary-dark 100%);
+  padding: s.$spacing-md;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: s.$spacing-2xl;
+  
+  @include s.mobile {
+    padding: s.$spacing-xl;
+    margin: s.$spacing-md;
+  }
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: s.$spacing-xl;
+}
+
+.login-form {
+  .form-group {
+    margin-bottom: s.$spacing-lg;
+    
+    .form-label {
+      display: block;
+      font-size: s.$font-size-sm;
+      font-weight: s.$font-weight-medium;
+      color: s.$gray-700;
+      margin-bottom: s.$spacing-sm;
+    }
+  }
+  
+  .form-actions {
+    margin-top: s.$spacing-xl;
+    margin-bottom: s.$spacing-lg;
+  }
+  
+  .demo-credentials {
+    padding-top: s.$spacing-lg;
+    border-top: 1px solid s.$gray-200;
+    text-align: center;
+  }
+}

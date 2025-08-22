@@ -1,0 +1,137 @@
+<div class="incident-detail" *ngIf="incident">
+  <div class="page-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="btn-secondary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back
+      </button>
+      <h1 class="page-title">{{ incident.number }} - {{ incident.title }}</h1>
+    </div>
+    <div class="header-actions">
+      <select
+        [(ngModel)]="incident.status"
+        (ngModelChange)="updateStatus($event)"
+        class="form-input status-select"
+        *ngIf="canUpdateStatus"
+      >
+        <option value="open">Open</option>
+        <option value="in-progress">In Progress</option>
+        <option value="resolved">Resolved</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="incident-content">
+    <div class="incident-main">
+      <div class="card incident-info">
+        <h2 class="section-title">Incident Details</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Status</label>
+            <span class="status-badge" [ngClass]="'status-' + incident.status">
+              {{ incident.status | titlecase }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Severity</label>
+            <span class="severity-badge" [ngClass]="'severity-' + incident.severity">
+              {{ incident.severity | titlecase }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Department</label>
+            <span>{{ incident.department }}</span>
+          </div>
+          <div class="info-item">
+            <label>Created</label>
+            <span>{{ incident.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="info-item" *ngIf="incident.assignedTo">
+            <label>Assigned To</label>
+            <span>{{ incident.assignedTo }}</span>
+          </div>
+          <div class="info-item" *ngIf="incident.resolvedAt">
+            <label>Resolved</label>
+            <span>{{ incident.resolvedAt | date:'medium' }}</span>
+          </div>
+        </div>
+        
+        <div class="description-section">
+          <h3>Description</h3>
+          <p class="description">{{ incident.description }}</p>
+        </div>
+      </div>
+      
+      <div class="card comments-section">
+        <h2 class="section-title">Comments</h2>
+        
+        <div class="comments-list" *ngIf="incident.comments.length > 0">
+          <div class="comment" *ngFor="let comment of incident.comments">
+            <div class="comment-header">
+              <span class="comment-author">{{ comment.userName }}</span>
+              <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
+            </div>
+            <p class="comment-content">{{ comment.content }}</p>
+          </div>
+        </div>
+        
+        <div class="add-comment">
+          <form (ngSubmit)="addComment()" class="comment-form">
+            <textarea
+              [(ngModel)]="newComment.content"
+              name="comment"
+              class="form-input"
+              rows="3"
+              placeholder="Add a comment..."
+              required
+            ></textarea>
+            <div class="comment-actions">
+              <button type="submit" class="btn-primary" [disabled]="!newComment.content.trim()">
+                Add Comment
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="incident-sidebar">
+      <div class="card attachments-section">
+        <h3 class="section-title">Attachments</h3>
+        
+        <div class="attachments-list" *ngIf="incident.attachments.length > 0">
+          <div class="attachment" *ngFor="let attachment of incident.attachments">
+            <div class="attachment-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+              </svg>
+            </div>
+            <div class="attachment-info">
+              <span class="attachment-name">{{ attachment.fileName }}</span>
+              <span class="attachment-size">{{ formatFileSize(attachment.fileSize) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="upload-section">
+          <input
+            type="file"
+            #fileInput
+            (change)="onFileSelected($event)"
+            class="file-input"
+            multiple
+          />
+          <button type="button" (click)="fileInput.click()" class="btn-secondary w-full">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>
+            Upload Files
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

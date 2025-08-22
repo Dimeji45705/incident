@@ -1,0 +1,133 @@
+<div class="change-request-detail" *ngIf="changeRequest">
+  <div class="page-header">
+    <div class="header-left">
+      <button (click)="goBack()" class="btn-secondary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back
+      </button>
+      <h1 class="page-title">{{ changeRequest.number }} - {{ changeRequest.title }}</h1>
+    </div>
+    <div class="header-actions">
+      <a [routerLink]="['/change-requests', changeRequest.id, 'edit']" 
+         class="btn-secondary" 
+         *ngIf="canEdit">
+        Edit
+      </a>
+      <button (click)="approveChangeRequest()" 
+              class="btn-success" 
+              *ngIf="canApprove">
+        Approve
+      </button>
+      <button (click)="rejectChangeRequest()" 
+              class="btn-danger" 
+              *ngIf="canReject">
+        Reject
+      </button>
+      <button (click)="completeChangeRequest()" 
+              class="btn-primary" 
+              *ngIf="canComplete">
+        Mark Complete
+      </button>
+    </div>
+  </div>
+  
+  <div class="change-request-content">
+    <div class="change-request-main">
+      <div class="card cr-info">
+        <h2 class="section-title">Change Request Details</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Status</label>
+            <span class="status-badge" [ngClass]="'status-' + changeRequest.status">
+              {{ changeRequest.status | titlecase }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Department</label>
+            <span>{{ changeRequest.department }}</span>
+          </div>
+          <div class="info-item">
+            <label>Created By</label>
+            <span>{{ changeRequest.createdByName }}</span>
+          </div>
+          <div class="info-item">
+            <label>Created</label>
+            <span>{{ changeRequest.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="info-item" *ngIf="changeRequest.approvedBy">
+            <label>Approved By</label>
+            <span>{{ changeRequest.approvedByName }}</span>
+          </div>
+          <div class="info-item" *ngIf="changeRequest.approvedAt">
+            <label>Approved</label>
+            <span>{{ changeRequest.approvedAt | date:'medium' }}</span>
+          </div>
+          <div class="info-item" *ngIf="changeRequest.completedAt">
+            <label>Completed</label>
+            <span>{{ changeRequest.completedAt | date:'medium' }}</span>
+          </div>
+        </div>
+        
+        <div class="description-section">
+          <h3>Description</h3>
+          <p class="description">{{ changeRequest.description }}</p>
+        </div>
+      </div>
+      
+      <div class="card details-section">
+        <h2 class="section-title">Change Details</h2>
+        
+        <div class="detail-item">
+          <h3>Justification</h3>
+          <p>{{ changeRequest.justification }}</p>
+        </div>
+        
+        <div class="detail-item">
+          <h3>Impact Assessment</h3>
+          <p>{{ changeRequest.impact }}</p>
+        </div>
+        
+        <div class="detail-item">
+          <h3>Rollback Plan</h3>
+          <p>{{ changeRequest.rollbackPlan }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="change-request-sidebar">
+      <div class="card timeline-section">
+        <h3 class="section-title">Timeline</h3>
+        
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker created"></div>
+            <div class="timeline-content">
+              <span class="timeline-title">Created</span>
+              <span class="timeline-date">{{ changeRequest.createdAt | date:'short' }}</span>
+              <span class="timeline-user">by {{ changeRequest.createdByName }}</span>
+            </div>
+          </div>
+          
+          <div class="timeline-item" *ngIf="changeRequest.approvedAt">
+            <div class="timeline-marker approved"></div>
+            <div class="timeline-content">
+              <span class="timeline-title">Approved</span>
+              <span class="timeline-date">{{ changeRequest.approvedAt | date:'short' }}</span>
+              <span class="timeline-user" *ngIf="changeRequest.approvedByName">by {{ changeRequest.approvedByName }}</span>
+            </div>
+          </div>
+          
+          <div class="timeline-item" *ngIf="changeRequest.completedAt">
+            <div class="timeline-marker completed"></div>
+            <div class="timeline-content">
+              <span class="timeline-title">Completed</span>
+              <span class="timeline-date">{{ changeRequest.completedAt | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
