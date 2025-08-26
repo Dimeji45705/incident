@@ -1,17 +1,102 @@
-<div class="change-request-list">
-  <div class="page-header">
-    <h1 class="page-title">Change Requests</h1>
-    <a routerLink="/change-requests/create" class="btn-primary">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="change-request-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Change Requests</h1>
+    <button class="btn-primary create-btn" (click)="createChangeRequest()">
+      <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
       Create Change Request
-    </a>
+    </button>
   </div>
-  
-  <div class="card">
+
+  <!-- Main Content Container -->
+  <div class="content-card">
+    <!-- Status Tabs -->
+    <div class="tabs-container">
+      <div class="tabs-wrapper">
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'all'"
+          (click)="onTabChange('all')"
+        >
+          All Requests <span class="tab-count">({{ getTotalCount() }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'pending'"
+          (click)="onTabChange('pending')"
+        >
+          Pending <span class="tab-count">({{ getStatusCount('pending') }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'approved'"
+          (click)="onTabChange('approved')"
+        >
+          Approved <span class="tab-count">({{ getStatusCount('approved') }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'rejected'"
+          (click)="onTabChange('rejected')"
+        >
+          Rejected <span class="tab-count">({{ getStatusCount('rejected') }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'returned'"
+          (click)="onTabChange('returned')"
+        >
+          Returned <span class="tab-count">({{ getStatusCount('returned') }})</span>
+        </button>
+      </div>
+      
+      <!-- Mobile Dropdown -->
+      <div class="mobile-tabs-dropdown">
+        <select 
+          class="tab-select" 
+          [(ngModel)]="activeTab" 
+          (change)="onTabChange(activeTab)"
+        >
+          <option value="all">All Requests ({{ getTotalCount() }})</option>
+          <option value="pending">Pending ({{ getStatusCount('pending') }})</option>
+          <option value="approved">Approved ({{ getStatusCount('approved') }})</option>
+          <option value="rejected">Rejected ({{ getStatusCount('rejected') }})</option>
+          <option value="returned">Returned ({{ getStatusCount('returned') }})</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search by request number, title, or department"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          >
+        </div>
+        <button class="btn-secondary search-btn">Search</button>
+      </div>
+      
+      <button class="filter-btn">
+        <svg class="filter-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"/>
+        </svg>
+        Filter By
+      </button>
+    </div>
+
+    <!-- Change Requests Table -->
     <div class="table-container">
-      <table class="table">
+      <table class="change-requests-table">
         <thead>
           <tr>
             <th>Number</th>
@@ -20,37 +105,62 @@
             <th>Department</th>
             <th>Created By</th>
             <th>Created</th>
-            <th>Actions</th>
+            <th class="actions-header">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let cr of changeRequests" (click)="viewChangeRequest(cr.id)" class="table-row-clickable">
-            <td class="font-medium">{{ cr.number }}</td>
-            <td>{{ cr.title }}</td>
+          <tr *ngFor="let cr of filteredChangeRequests" class="table-row">
+            <td class="request-number">{{ cr.number }}</td>
+            <td class="request-title">{{ cr.title }}</td>
             <td>
-              <span class="status-badge" [ngClass]="'status-' + cr.status">
+              <span class="status-pill" [ngClass]="getStatusClass(cr.status)">
                 {{ cr.status | titlecase }}
               </span>
             </td>
-            <td>{{ cr.department }}</td>
-            <td>{{ cr.createdByName }}</td>
-            <td>{{ cr.createdAt | date:'short' }}</td>
-            <td>
-              <div class="action-buttons">
-                <a [routerLink]="['/change-requests', cr.id]" class="btn-secondary btn-sm">View</a>
-              </div>
+            <td class="department">{{ cr.department }}</td>
+            <td class="created-by">{{ cr.createdByName }}</td>
+            <td class="created-date">{{ cr.createdAt | date:'MMM dd, yyyy' }}</td>
+            <td class="actions-cell">
+              <button 
+                class="view-more-btn"
+                (click)="viewChangeRequest(cr.id)"
+              >
+                View More
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
       
-      <div *ngIf="changeRequests.length === 0" class="empty-state">
-        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        <h3>No change requests found</h3>
-        <p>Get started by creating your first change request.</p>
-        <a routerLink="/change-requests/create" class="btn-primary">Create Change Request</a>
+      <!-- Empty State -->
+      <div *ngIf="filteredChangeRequests.length === 0" class="empty-state">
+        <div class="empty-icon-wrapper">
+          <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">No change requests found</h3>
+        <p class="empty-description">No change requests match your current filters. Try adjusting your search or create a new request.</p>
+        <button class="btn-primary empty-cta">Create New Change Request</button>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        1-10 of {{ getTotalCount() }}
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" disabled>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button class="pagination-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>

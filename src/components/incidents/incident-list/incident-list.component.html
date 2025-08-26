@@ -1,60 +1,353 @@
-<div class="incident-list">
-  <div class="page-header">
-    <h1 class="page-title">Incidents</h1>
-    <a routerLink="/incidents/create" class="btn-primary">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="incident-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Incidents</h1>
+    <button class="btn-primary create-btn" (click)="createIncident()">
+      <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
       Create Incident
-    </a>
+    </button>
   </div>
-  
-  <div class="card">
-    <div class="table-container">
-      <table class="table">
+
+  <!-- Main Content Card -->
+  <div class="content-card">
+    <!-- Status Tabs -->
+    <div class="tabs-container">
+      <div class="tabs-wrapper">
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'all'"
+          (click)="onTabChange('all')"
+        >
+          All Incidents <span class="tab-count">({{ getTotalCount() }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'open'"
+          (click)="onTabChange('open')"
+        >
+          Open <span class="tab-count">({{ getStatusCount('open') }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'in-progress'"
+          (click)="onTabChange('in-progress')"
+        >
+          In Progress <span class="tab-count">({{ getStatusCount('in-progress') }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'resolved'"
+          (click)="onTabChange('resolved')"
+        >
+          Resolved <span class="tab-count">({{ getStatusCount('resolved') }})</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="activeTab === 'closed'"
+          (click)="onTabChange('closed')"
+        >
+          Closed <span class="tab-count">({{ getStatusCount('closed') }})</span>
+        </button>
+      </div>
+      
+      <!-- Mobile Dropdown -->
+      <div class="mobile-tabs-dropdown">
+        <select 
+          class="tab-select" 
+          [(ngModel)]="activeTab" 
+          (change)="onTabChange(activeTab)"
+        >
+          <option value="all">All Incidents ({{ getTotalCount() }})</option>
+          <option value="open">Open ({{ getStatusCount('open') }})</option>
+          <option value="in-progress">In Progress ({{ getStatusCount('in-progress') }})</option>
+          <option value="resolved">Resolved ({{ getStatusCount('resolved') }})</option>
+          <option value="closed">Closed ({{ getStatusCount('closed') }})</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search by incident number, title, or department"
+            [(ngModel)]="searchTerm"
+            (input)="onSearch()"
+          >
+        </div>
+        <button class="btn-secondary search-btn" (click)="applyFilters()">Search</button>
+      </div>
+      
+      <button class="filter-btn" (click)="toggleFilterPanel()">
+        <svg class="filter-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"/>
+        </svg>
+        Filter By
+      </button>
+      
+      <!-- Column Selector Button -->
+      <button class="column-btn" (click)="toggleColumnSelector()">
+        <svg class="column-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+        </svg>
+        Columns
+      </button>
+      
+      <!-- Column Selector Panel -->
+      <div class="column-panel" [ngClass]="{'show': showColumnSelector}">
+        <div class="column-panel-header">
+          <h3 class="column-panel-title">Visible Columns</h3>
+          <button class="close-btn" (click)="toggleColumnSelector()">
+            <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="column-panel-content">
+          <div class="column-toggle" *ngFor="let column of visibleColumns | keyvalue">
+            <label class="column-checkbox">
+              <input type="checkbox" [checked]="column.value" (change)="toggleColumnVisibility(column.key)">
+              <span class="column-name">{{ formatColumnName(column.key) }}</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="column-panel-footer">
+          <button class="btn-secondary" (click)="resetColumnVisibility()">Reset to Default</button>
+        </div>
+      </div>
+      
+      <!-- Advanced Filter Panel -->
+      <div class="filter-panel" [ngClass]="{'show': showFilterPanel}">
+        <div class="filter-panel-header">
+          <h3 class="filter-panel-title">Advanced Filters</h3>
+          <button class="close-filter-btn" (click)="toggleFilterPanel()">
+            <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="filter-panel-content">
+          <!-- Status Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select class="filter-select" [(ngModel)]="advancedFilters.status" name="status">
+              <option [value]="''">All Statuses</option>
+              <option value="INVESTIGATING">Investigating</option>
+              <option value="RESOLVED">Resolved</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+          </div>
+          
+          <!-- Severity Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Severity</label>
+            <select class="filter-select" [(ngModel)]="advancedFilters.severity" name="severity">
+              <option [value]="''">All Severities</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="CRITICAL">Critical</option>
+            </select>
+          </div>
+          
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Category</label>
+            <select class="filter-select" [(ngModel)]="advancedFilters.category" name="category">
+              <option [value]="''">All Categories</option>
+              <option value="TECHNICAL_FAILURE">Technical Failure</option>
+              <option value="HUMAN_ERROR">Human Error</option>
+              <option value="EXTERNAL_FACTOR">External Factor</option>
+              <option value="SECURITY_BREACH">Security Breach</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          
+          <!-- Department Filter (you might want to load this dynamically) -->
+          <div class="filter-group">
+            <label class="filter-label">Department</label>
+            <input type="text" class="filter-input" [(ngModel)]="advancedFilters.department" name="department" placeholder="Enter department">
+          </div>
+          
+          <!-- Date Range Filter -->
+          <div class="filter-group date-range">
+            <label class="filter-label">Date Range</label>
+            <div class="date-inputs">
+              <input type="date" class="filter-input date" [(ngModel)]="advancedFilters.startDate" name="startDate" placeholder="From">
+              <span class="date-separator">to</span>
+              <input type="date" class="filter-input date" [(ngModel)]="advancedFilters.endDate" name="endDate" placeholder="To">
+            </div>
+          </div>
+        </div>
+        
+        <div class="filter-panel-footer">
+          <button class="btn-secondary" (click)="clearFilters()">Clear Filters</button>
+          <button class="btn-primary" (click)="applyAdvancedFilters()">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading incidents...</p>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="showError" [@fadeInOut]>
+      <div class="error-content">
+        <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="error-text">{{ errorMessage }}</span>
+        <button class="close-error-btn" (click)="dismissError()">
+          <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Incidents Table -->
+    <div class="table-container" [class.blurred]="isLoading">
+      <table class="incidents-table">
         <thead>
           <tr>
-            <th>Number</th>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Severity</th>
-            <th>Department</th>
-            <th>Created</th>
+            <th *ngIf="visibleColumns['number']" (click)="sortBy('number')" class="sortable-header">
+              Number
+              <span class="sort-icon" [ngClass]="getSortIcon('number')"></span>
+            </th>
+            <th *ngIf="visibleColumns['title']" (click)="sortBy('title')" class="sortable-header">
+              Title
+              <span class="sort-icon" [ngClass]="getSortIcon('title')"></span>
+            </th>
+            <th *ngIf="visibleColumns['status']" (click)="sortBy('status')" class="sortable-header">
+              Status
+              <span class="sort-icon" [ngClass]="getSortIcon('status')"></span>
+            </th>
+            <th *ngIf="visibleColumns['severity']" (click)="sortBy('severity')" class="sortable-header">
+              Severity
+              <span class="sort-icon" [ngClass]="getSortIcon('severity')"></span>
+            </th>
+            <th *ngIf="visibleColumns['category']" (click)="sortBy('category')" class="sortable-header">
+              Category
+              <span class="sort-icon" [ngClass]="getSortIcon('category')"></span>
+            </th>
+            <th *ngIf="visibleColumns['department']" (click)="sortBy('department')" class="sortable-header">
+              Department
+              <span class="sort-icon" [ngClass]="getSortIcon('department')"></span>
+            </th>
+            <th *ngIf="visibleColumns['createdAt']" (click)="sortBy('createdAt')" class="sortable-header">
+              Created
+              <span class="sort-icon" [ngClass]="getSortIcon('createdAt')"></span>
+            </th>
+            <th *ngIf="visibleColumns['reporterName']" (click)="sortBy('reporterName')" class="sortable-header">
+              Reporter
+              <span class="sort-icon" [ngClass]="getSortIcon('reporterName')"></span>
+            </th>
+            <th *ngIf="visibleColumns['financialImpact']" (click)="sortBy('financialImpact')" class="sortable-header">
+              Financial Impact
+              <span class="sort-icon" [ngClass]="getSortIcon('financialImpact')"></span>
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let incident of incidents" (click)="viewIncident(incident.id)" class="table-row-clickable">
-            <td class="font-medium">{{ incident.number }}</td>
-            <td>{{ incident.title }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-' + incident.status">
+          <tr *ngFor="let incident of filteredIncidents" class="table-row">
+            <td *ngIf="visibleColumns['number']" class="incident-number">{{ incident.number }}</td>
+            <td *ngIf="visibleColumns['title']" class="incident-title">{{ incident.title }}</td>
+            <td *ngIf="visibleColumns['status']">
+              <span class="status-pill" [ngClass]="getStatusClass(incident.status)">
                 {{ incident.status | titlecase }}
               </span>
             </td>
-            <td>
-              <span class="severity-badge" [ngClass]="'severity-' + incident.severity">
+            <td *ngIf="visibleColumns['severity']">
+              <span class="severity-pill" [ngClass]="getSeverityClass(incident.severity)">
                 {{ incident.severity | titlecase }}
               </span>
             </td>
-            <td>{{ incident.department }}</td>
-            <td>{{ incident.createdAt | date:'short' }}</td>
-            <td>
-              <div class="action-buttons">
-                <a [routerLink]="['/incidents', incident.id]" class="btn-secondary btn-sm">View</a>
+            <td *ngIf="visibleColumns['category']">{{ incident.category }}</td>
+            <td *ngIf="visibleColumns['department']">{{ incident.department }}</td>
+            <td *ngIf="visibleColumns['createdAt']">{{ incident.createdAt | date:'short' }}</td>
+            <td *ngIf="visibleColumns['reporterName']">{{ incident.reporterName }}</td>
+            <td *ngIf="visibleColumns['financialImpact']">{{ incident.financialImpact | currency }}</td>
+            <td class="actions">
+              <button class="action-btn view" [routerLink]="['/incidents', incident.id]" title="View Incident">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              </button>
+              <button class="action-btn edit" [routerLink]="['/incidents', incident.id]" [queryParams]="{edit: true}" title="Edit Incident">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+          
+          <!-- Simple Empty State -->
+          <tr *ngIf="filteredIncidents.length === 0 && !isLoading">
+            <td [attr.colspan]="getVisibleColumnCount()" class="simple-empty-state">
+              <div class="empty-message">
+                <p class="empty-text">
+                  <span *ngIf="hasActiveFilters(); else noFiltersMessage">
+                    No incidents match your current filters.
+                  </span>
+                  <ng-template #noFiltersMessage>
+                    No incidents found.
+                  </ng-template>
+                </p>
+                <button *ngIf="hasActiveFilters()" 
+                        class="clear-filters-btn" 
+                        (click)="clearAllFilters()">
+                  Clear Filters
+                </button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
-      
-      <div *ngIf="incidents.length === 0" class="empty-state">
-        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        <h3>No incidents found</h3>
-        <p>Get started by creating your first incident.</p>
-        <a routerLink="/incidents/create" class="btn-primary">Create Incident</a>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalElements > 0">
+      <div class="pagination-info">
+        {{ ((currentPage - 1) * pageSize) + 1 }}-{{ currentPage * pageSize > totalElements ? totalElements : currentPage * pageSize }} of {{ getTotalCount() }}
+      </div>
+      <div class="page-size-selector">
+        <span class="page-size-label">Show</span>
+        <select [(ngModel)]="pageSize" (change)="setPageSize(pageSize)" class="page-size-dropdown">
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="50">50</option>
+          <option [value]="100">100</option>
+        </select>
+        <span class="page-size-label">per page</span>
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" [disabled]="currentPage <= 1" (click)="previousPage()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span class="pagination-page-indicator" *ngIf="totalPages > 0">{{ currentPage }} / {{ totalPages }}</span>
+        <button class="pagination-btn" [disabled]="currentPage >= totalPages" (click)="nextPage()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>

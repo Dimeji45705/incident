@@ -5,63 +5,354 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Back
+        Back 
       </button>
-      <h1 class="page-title">{{ incident.number }} - {{ incident.title }}</h1>
+      <h1 class="page-title">{{ incident.number }} - {{ editMode ? incidentForm.title : incident.title }}</h1>
     </div>
     <div class="header-actions">
+      <!-- Edit mode actions -->
+      <div class="edit-actions" *ngIf="editMode && canEditIncident">
+        <button (click)="enableEditMode()" class="btn-primary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Edit Incident
+        </button>
+      </div>
+      
+      <!-- Save/Cancel buttons in edit mode -->
+      <div class="edit-actions" *ngIf="editMode">
+        <button (click)="cancelEdit()" class="btn-secondary mr-2" [disabled]="saving">
+          Cancel
+        </button>
+        <button (click)="saveIncident()" class="btn-primary" [disabled]="saving">
+          <span *ngIf="!saving">Save Changes</span>
+          <span *ngIf="saving">Saving...</span>
+        </button>
+      </div>
+      
+      <!-- Status dropdown (only visible in non-edit mode) -->
       <select
+        *ngIf="canUpdateStatus && !editMode"
         [(ngModel)]="incident.status"
         (ngModelChange)="updateStatus($event)"
         class="form-input status-select"
-        *ngIf="canUpdateStatus"
       >
-        <option value="open">Open</option>
-        <option value="in-progress">In Progress</option>
-        <option value="resolved">Resolved</option>
-        <option value="closed">Closed</option>
+        <option value="INVESTIGATING">Investigating</option>
+        <option value="RESOLVED">Resolved</option>
+        <option value="CLOSED">Closed</option>
       </select>
     </div>
   </div>
   
   <div class="incident-content">
     <div class="incident-main">
-      <div class="card incident-info">
-        <h2 class="section-title">Incident Details</h2>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Status</label>
-            <span class="status-badge" [ngClass]="'status-' + incident.status">
-              {{ incident.status | titlecase }}
-            </span>
-          </div>
-          <div class="info-item">
-            <label>Severity</label>
-            <span class="severity-badge" [ngClass]="'severity-' + incident.severity">
-              {{ incident.severity | titlecase }}
-            </span>
-          </div>
-          <div class="info-item">
-            <label>Department</label>
-            <span>{{ incident.department }}</span>
-          </div>
-          <div class="info-item">
-            <label>Created</label>
-            <span>{{ incident.createdAt | date:'medium' }}</span>
-          </div>
-          <div class="info-item" *ngIf="incident.assignedTo">
-            <label>Assigned To</label>
-            <span>{{ incident.assignedTo }}</span>
-          </div>
-          <div class="info-item" *ngIf="incident.resolvedAt">
-            <label>Resolved</label>
-            <span>{{ incident.resolvedAt | date:'medium' }}</span>
+      <div class="card incident-info" [class.edit-mode]="editMode">
+        <div class="incident-header">
+          <h2 class="section-title">Incident Details</h2>
+          <div class="incident-identifier">
+            <span class="incident-number">{{ incident.number }}</span>
           </div>
         </div>
         
+        <div class="save-error alert-error" *ngIf="saveError">
+          {{ saveError }}
+        </div>
+        
+        <!-- Basic Information -->
+        <div class="info-section">
+          <h3 class="subsection-title">Basic Information</h3>
+          
+          <!-- View Mode -->
+          <div class="info-grid" *ngIf="!editMode">
+            <div class="info-item">
+              <label>Status</label>
+              <span class="status-badge" [ngClass]="'status-' + incident.status">
+                {{ incident.status | titlecase }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Severity</label>
+              <span class="severity-badge" [ngClass]="'severity-' + incident.severity">
+                {{ incident.severity | titlecase }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Category</label>
+              <span>{{ incident.category | titlecase }}</span>
+            </div>
+            <div class="info-item">
+              <label>Risk Level</label>
+              <span class="risk-badge" [ngClass]="'risk-' + incident.riskLevel">
+                {{ incident.riskLevel | titlecase }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Department</label>
+              <span>{{ incident.department }}</span>
+            </div>
+            <div class="info-item">
+              <label>Compliance Impact</label>
+              <span [class.compliance-yes]="incident.complianceFlag">{{ incident.complianceFlag ? 'Yes' : 'No' }}</span>
+            </div>
+          </div>
+          
+          <!-- Edit Mode -->
+          <div class="edit-form info-grid" *ngIf="editMode">
+            <div class="info-item">
+              <label for="edit-title">Title</label>
+              <input 
+                type="text" 
+                id="edit-title" 
+                name="title" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.title" 
+                required
+              />
+            </div>
+            <div class="info-item">
+              <label for="edit-status">Status</label>
+              <select 
+                id="edit-status" 
+                name="status" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.status"
+              >
+                <option value="INVESTIGATING">Investigating</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <label for="edit-severity">Severity</label>
+              <select 
+                id="edit-severity" 
+                name="severity" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.severity"
+              >
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <label for="edit-category">Category</label>
+              <select 
+                id="edit-category" 
+                name="category" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.category"
+              >
+                <option value="TECHNICAL_FAILURE">Technical Failure</option>
+                <option value="HUMAN_ERROR">Human Error</option>
+                <option value="EXTERNAL_FACTOR">External Factor</option>
+                <option value="SECURITY_BREACH">Security Breach</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <label for="edit-risk">Risk Level</label>
+              <select 
+                id="edit-risk" 
+                name="riskLevel" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.riskLevel"
+              >
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+            </div>
+            <div class="info-item">
+              <label for="edit-department">Department</label>
+              <input 
+                type="text" 
+                id="edit-department" 
+                name="department" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.department"
+              />
+            </div>
+            <div class="info-item">
+              <label>Compliance Impact</label>
+              <div class="checkbox-wrapper">
+                <input 
+                  type="checkbox" 
+                  id="edit-compliance" 
+                  name="complianceFlag" 
+                  [(ngModel)]="incidentForm.complianceFlag"
+                />
+                <label for="edit-compliance" class="checkbox-label">Has compliance impact</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Timing Information -->
+        <div class="info-section">
+          <h3 class="subsection-title">Timeline</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Incident Date</label>
+              <span>{{ incident.incidentDate | date:'medium' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Detected At</label>
+              <span>{{ incident.detectedAt | date:'medium' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Created</label>
+              <span>{{ incident.createdAt | date:'medium' }}</span>
+            </div>
+            <div class="info-item" *ngIf="incident.resolvedAt">
+              <label>Resolved At</label>
+              <span>{{ incident.resolvedAt | date:'medium' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Last Updated</label>
+              <span>{{ incident.updatedAt | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Impact Information -->
+        <div class="info-section">
+          <h3 class="subsection-title">Impact Details</h3>
+          
+          <!-- View Mode -->
+          <div class="info-grid" *ngIf="!editMode">
+            <div class="info-item">
+              <label>Customer Impact</label>
+              <span>{{ incident.customerImpactCount | number }} customers affected</span>
+            </div>
+            <div class="info-item">
+              <label>Financial Impact</label>
+              <span>{{ incident.financialImpact | currency }}</span>
+            </div>
+            <div class="info-item">
+              <label>Affected Transactions</label>
+              <span>{{ incident.affectedTransactions || 'None' }}</span>
+            </div>
+          </div>
+          
+          <!-- Edit Mode -->
+          <div class="edit-form info-grid" *ngIf="editMode">
+            <div class="info-item">
+              <label for="edit-customers">Customer Impact</label>
+              <input 
+                type="number" 
+                id="edit-customers" 
+                name="customerImpactCount" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.customerImpactCount"
+              />
+            </div>
+            <div class="info-item">
+              <label for="edit-financial">Financial Impact</label>
+              <input 
+                type="number" 
+                id="edit-financial" 
+                name="financialImpact" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.financialImpact"
+                step="0.01"
+              />
+            </div>
+            <div class="info-item">
+              <label for="edit-transactions">Affected Transactions</label>
+              <input 
+                type="text" 
+                id="edit-transactions" 
+                name="affectedTransactions" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.affectedTransactions"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <!-- Technical Details -->
+        <div class="info-section">
+          <h3 class="subsection-title">Technical Details</h3>
+          
+          <!-- View Mode -->
+          <div class="info-grid" *ngIf="!editMode">
+            <div class="info-item full-width">
+              <label>Involved Systems</label>
+              <span>{{ incident.involvedSystems || 'None specified' }}</span>
+            </div>
+          </div>
+          
+          <!-- Edit Mode -->
+          <div class="edit-form info-grid" *ngIf="editMode">
+            <div class="info-item full-width">
+              <label for="edit-systems">Involved Systems</label>
+              <textarea 
+                id="edit-systems" 
+                name="involvedSystems" 
+                class="form-input" 
+                [(ngModel)]="incidentForm.involvedSystems"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Reporter Information -->
+        <div class="info-section">
+          <h3 class="subsection-title">Reporter</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Reporter Name</label>
+              <span>{{ incident.reporterName }}</span>
+            </div>
+            <div class="info-item" *ngIf="incident.assignedTo">
+              <label>Assigned To</label>
+              <span>{{ incident.assignedTo }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Description Section -->
         <div class="description-section">
-          <h3>Description</h3>
-          <p class="description">{{ incident.description }}</p>
+          <h3 class="subsection-title">Description</h3>
+          
+          <!-- View Mode -->
+          <p class="description" *ngIf="!editMode">{{ incident.description }}</p>
+          
+          <!-- Edit Mode -->
+          <div *ngIf="editMode">
+            <textarea 
+              class="form-input description-textarea" 
+              [(ngModel)]="incidentForm.description"
+              name="description"
+              rows="5"
+            ></textarea>
+          </div>
+        </div>
+        
+        <!-- Resolution Details -->
+        <div class="info-section">
+          <h3 class="subsection-title">Resolution Details</h3>
+          
+          <!-- View Mode -->
+          <div class="resolution-details" *ngIf="!editMode">
+            <p>{{ incident.resolutionDetails || 'No resolution details provided' }}</p>
+          </div>
+          
+          <!-- Edit Mode -->
+          <div *ngIf="editMode">
+            <textarea 
+              class="form-input resolution-textarea" 
+              [(ngModel)]="incidentForm.resolutionDetails"
+              name="resolutionDetails"
+              rows="3"
+              placeholder="Enter resolution details if incident is resolved"
+            ></textarea>
+          </div>
         </div>
       </div>
       
@@ -102,7 +393,7 @@
       <div class="card attachments-section">
         <h3 class="section-title">Attachments</h3>
         
-        <div class="attachments-list" *ngIf="incident.attachments.length > 0">
+        <div class="attachments-list" *ngIf="incident.attachments && incident.attachments.length > 0">
           <div class="attachment" *ngFor="let attachment of incident.attachments">
             <div class="attachment-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,26 +401,87 @@
               </svg>
             </div>
             <div class="attachment-info">
-              <span class="attachment-name">{{ attachment.fileName }}</span>
+              <div class="attachment-name-wrapper">
+                <span class="attachment-name" title="{{attachment.fileName}}">{{ attachment.fileName }}</span>
+              </div>
+              <span class="attachment-description" *ngIf="attachment.description">{{ attachment.description }}</span>
               <span class="attachment-size">{{ formatFileSize(attachment.fileSize) }}</span>
+            </div>
+            <div class="attachment-actions">
+              <button type="button" class="btn-icon" (click)="downloadAttachment(attachment)" title="Download">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+              </button>
+              <button type="button" class="btn-icon text-red-500" (click)="deleteAttachment(attachment)" title="Delete">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
         
         <div class="upload-section">
-          <input
-            type="file"
-            #fileInput
-            (change)="onFileSelected($event)"
-            class="file-input"
-            multiple
-          />
-          <button type="button" (click)="fileInput.click()" class="btn-secondary w-full">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-            </svg>
-            Upload Files
-          </button>
+          <div class="upload-form" [class.uploading]="uploadingAttachment">
+            <div class="form-group">
+              <input
+                type="file"
+                #fileInput
+                (change)="onFileSelected($event)"
+                class="file-input"
+                [disabled]="uploadingAttachment"
+              />
+              <div class="file-select-wrapper">
+                <button 
+                  type="button" 
+                  (click)="fileInput.click()" 
+                  class="btn-secondary w-full"
+                  [disabled]="uploadingAttachment"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                  </svg>
+                  {{ selectedFile ? selectedFile.name : 'Choose File' }}
+                </button>
+              </div>
+            </div>
+            
+            <div class="form-group" *ngIf="selectedFile">
+              <label for="attachment-description">Description (optional)</label>
+              <input
+                type="text"
+                id="attachment-description"
+                class="form-input"
+                [(ngModel)]="attachmentDescription"
+                name="description"
+                placeholder="Brief description of this file"
+                [disabled]="uploadingAttachment"
+              />
+            </div>
+            
+            <div class="upload-error" *ngIf="uploadError">
+              {{ uploadError }}
+            </div>
+            
+            <div class="upload-progress" *ngIf="uploadingAttachment">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+              </div>
+              <span class="progress-text">Uploading... {{ uploadProgress }}%</span>
+            </div>
+            
+            <div class="form-actions" *ngIf="selectedFile && !uploadingAttachment">
+              <button
+                type="button"
+                class="btn-primary"
+                (click)="uploadAttachment()"
+                [disabled]="!selectedFile || uploadingAttachment"
+              >
+                Upload Attachment
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

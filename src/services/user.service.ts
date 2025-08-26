@@ -129,7 +129,17 @@ export class UserService {
   }
 
   getDepartments(): Observable<string[]> {
-    const departments = ['IT', 'Security', 'Administration', 'HR', 'Finance', 'Operations'];
+    const departments = [
+      'OPERATIONS_TEAM', 
+      'COMPLIANCE_TEAM', 
+      'FINANCE_TEAM', 
+      'TECH_TEAM', 
+      'GENERAL', 
+      'VENDOR_MANAGEMENT', 
+      'SECURITY_TEAM', 
+      'PRODUCT_TEAM', 
+      'CUSTOMER_SUPPORT'
+    ];
     return of(departments);
   }
 }

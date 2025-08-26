@@ -17,12 +17,48 @@ export class IncidentFormComponent implements OnInit {
   incident: CreateIncidentRequest = {
     title: '',
     description: '',
-    severity: 'medium',
+    category: 'TECHNICAL_FAILURE',
+    severity: 'MEDIUM',
+    riskLevel: 'MEDIUM',
+    financialImpact: 0,
+    affectedTransactions: '',
+    customerImpactCount: 0,
+    complianceFlag: false,
+    involvedSystems: '',
+    incidentDate: new Date().toISOString().split('T')[0] + 'T00:00:00',
     department: ''
   };
   
+  // Category options for the form
+  categories = [
+    { value: 'TECHNICAL_FAILURE', label: 'Technical Failure' },
+    { value: 'OPERATIONAL_ERROR', label: 'Operational Error' },
+    { value: 'SECURITY_BREACH', label: 'Security Breach' },
+    { value: 'COMPLIANCE_ISSUE', label: 'Compliance Issue' },
+    { value: 'FRAUD_INCIDENT', label: 'Fraud Incident' },
+    { value: 'VENDOR_PROBLEM', label: 'Vendor Problem' },
+    { value: 'OTHER', label: 'Other' }
+  ];
+  
+  // Risk level options
+  riskLevels = [
+    { value: 'LOW', label: 'Low' },
+    { value: 'MEDIUM', label: 'Medium' },
+    { value: 'HIGH', label: 'High' },
+    { value: 'CRITICAL', label: 'Critical' }
+  ];
+  
+  // Severity options
+  severityLevels = [
+    { value: 'LOW', label: 'Low' },
+    { value: 'MEDIUM', label: 'Medium' },
+    { value: 'HIGH', label: 'High' },
+    { value: 'CRITICAL', label: 'Critical' }
+  ];
+  
   departments: string[] = [];
   isSubmitting = false;
+  errors: { [key: string]: string } = {};
 
   constructor(
     private incidentService: IncidentService,
@@ -36,9 +72,45 @@ export class IncidentFormComponent implements OnInit {
     });
   }
 
+  validateForm(): boolean {
+    this.errors = {};
+    let isValid = true;
+    
+    // Required field validation
+    if (!this.incident.title || !this.incident.description || !this.incident.department || !this.incident.severity) {
+      alert('Please fill in all required fields (Title, Description, Department, and Severity)');
+      return false;
+    }
+    
+    // Title length validation
+    if (this.incident.title.length < 5 || this.incident.title.length > 200) {
+      this.errors['title'] = 'Title must be between 5 and 200 characters';
+      isValid = false;
+    }
+    
+    // Description length validation
+    if (this.incident.description.length < 20 || this.incident.description.length > 2000) {
+      this.errors['description'] = 'Description must be between 20 and 2000 characters';
+      isValid = false;
+    }
+    
+    return isValid;
+  }
+  
   onSubmit(): void {
-    if (!this.incident.title || !this.incident.description || !this.incident.department) {
+    // Validate the form
+    if (!this.validateForm()) {
       return;
+    }
+
+    // Format financial impact as a number
+    if (this.incident.financialImpact) {
+      this.incident.financialImpact = Number(this.incident.financialImpact);
+    }
+
+    // Format customer impact count as a number
+    if (this.incident.customerImpactCount) {
+      this.incident.customerImpactCount = Number(this.incident.customerImpactCount);
     }
 
     this.isSubmitting = true;
@@ -46,11 +118,18 @@ export class IncidentFormComponent implements OnInit {
     this.incidentService.createIncident(this.incident).subscribe({
       next: (incident) => {
         this.isSubmitting = false;
-        this.router.navigate(['/incidents', incident.id]);
+        if (incident && incident.id) {
+          this.router.navigate(['/incidents', incident.id]);
+        } else {
+          console.error('Received null or invalid incident from API');
+          this.router.navigate(['/incidents']);
+          alert('Incident was created but the response was incomplete. Redirecting to incidents list.');
+        }
       },
       error: (error) => {
         this.isSubmitting = false;
         console.error('Failed to create incident:', error);
+        alert('Failed to create incident. Please try again.');
       }
     });
   }

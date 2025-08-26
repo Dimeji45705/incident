@@ -5,6 +5,8 @@
   
   <div class="card">
     <form (ngSubmit)="onSubmit()" class="form">
+      <!-- Basic Information Section -->
+      <h2 class="section-title">Basic Information</h2>
       <div class="form-grid">
         <div class="form-group">
           <label for="title" class="form-label">Title *</label>
@@ -14,25 +16,22 @@
             name="title"
             [(ngModel)]="incident.title"
             class="form-input"
-            placeholder="Enter incident title"
+            [ngClass]="{'error-input': errors['title']}"
+            placeholder="Enter incident title (5-200 characters)"
             required
           />
+          <div *ngIf="errors['title']" class="error-message">{{ errors['title'] }}</div>
         </div>
         
         <div class="form-group">
-          <label for="severity" class="form-label">Severity *</label>
+          <label for="category" class="form-label">Category</label>
           <select
-            id="severity"
-            name="severity"
-            [(ngModel)]="incident.severity"
+            id="category"
+            name="category"
+            [(ngModel)]="incident.category"
             class="form-input"
-            required
           >
-            <option value="">Select severity</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
+            <option *ngFor="let category of categories" [value]="category.value">{{ category.label }}</option>
           </select>
         </div>
         
@@ -50,7 +49,8 @@
           </select>
         </div>
       </div>
-      
+
+      <!-- Description -->
       <div class="form-group">
         <label for="description" class="form-label">Description *</label>
         <textarea
@@ -58,12 +58,123 @@
           name="description"
           [(ngModel)]="incident.description"
           class="form-input"
+          [ngClass]="{'error-input': errors['description']}"
           rows="6"
-          placeholder="Describe the incident in detail..."
+          placeholder="Describe the incident in detail (20-2000 characters)..."
           required
+        ></textarea>
+        <div *ngIf="errors['description']" class="error-message">{{ errors['description'] }}</div>
+      </div>
+      
+      <!-- Severity and Risk Section -->
+      <h2 class="section-title">Severity and Risk</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="severity" class="form-label">Severity *</label>
+          <select
+            id="severity"
+            name="severity"
+            [(ngModel)]="incident.severity"
+            class="form-input"
+            required
+          >
+            <option *ngFor="let severity of severityLevels" [value]="severity.value">{{ severity.label }}</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="riskLevel" class="form-label">Risk Level</label>
+          <select
+            id="riskLevel"
+            name="riskLevel"
+            [(ngModel)]="incident.riskLevel"
+            class="form-input"
+          >
+            <option *ngFor="let risk of riskLevels" [value]="risk.value">{{ risk.label }}</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="complianceFlag" class="form-label">Compliance Flag</label>
+          <div class="checkbox-container">
+            <input
+              type="checkbox"
+              id="complianceFlag"
+              name="complianceFlag"
+              [(ngModel)]="incident.complianceFlag"
+              class="form-checkbox"
+            />
+            <label for="complianceFlag" class="checkbox-label">Compliance Impacted</label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Impact Section -->
+      <h2 class="section-title">Impact Details</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="financialImpact" class="form-label">Financial Impact</label>
+          <input
+            type="number"
+            id="financialImpact"
+            name="financialImpact"
+            [(ngModel)]="incident.financialImpact"
+            class="form-input"
+            placeholder="Amount in $"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="customerImpactCount" class="form-label">Affected Customers</label>
+          <input
+            type="number"
+            id="customerImpactCount"
+            name="customerImpactCount"
+            [(ngModel)]="incident.customerImpactCount"
+            class="form-input"
+            placeholder="Number of affected customers"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="incidentDate" class="form-label">Incident Date</label>
+          <input
+            type="datetime-local"
+            id="incidentDate"
+            name="incidentDate"
+            [(ngModel)]="incident.incidentDate"
+            class="form-input"
+          />
+        </div>
+      </div>
+      
+      <!-- Technical Details Section -->
+      <h2 class="section-title">Technical Details</h2>
+      <div class="form-group">
+        <label for="affectedTransactions" class="form-label">Affected Transactions</label>
+        <input
+          type="text"
+          id="affectedTransactions"
+          name="affectedTransactions"
+          [(ngModel)]="incident.affectedTransactions"
+          class="form-input"
+          placeholder="Comma-separated transaction IDs (e.g., TRX-2025-001,TRX-2025-002)"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="involvedSystems" class="form-label">Involved Systems</label>
+        <textarea
+          id="involvedSystems"
+          name="involvedSystems"
+          [(ngModel)]="incident.involvedSystems"
+          class="form-input"
+          rows="3"
+          placeholder="List of systems involved in the incident (e.g., Payment Gateway, Core Banking System)"
         ></textarea>
       </div>
       
+      <!-- Form Actions -->
       <div class="form-actions">
         <button type="button" (click)="cancel()" class="btn-secondary">Cancel</button>
         <button type="submit" class="btn-primary" [disabled]="isSubmitting">

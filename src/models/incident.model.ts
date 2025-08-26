@@ -3,51 +3,80 @@ export interface Incident {
   number: string;
   title: string;
   description: string;
-  status: 'open' | 'in-progress' | 'resolved' | 'closed';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  category?: 'TECHNICAL_FAILURE' | 'HUMAN_ERROR' | 'EXTERNAL_FACTOR' | 'SECURITY_BREACH' | 'OTHER';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  status: 'INVESTIGATING' | 'RESOLVED' | 'CLOSED';
+  financialImpact?: number;
+  affectedTransactions?: string;
+  customerImpactCount?: number;
+  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  complianceFlag?: boolean;
+  involvedSystems?: string;
+  incidentDate?: string;
+  detectedAt?: string;
+  resolvedAt?: string;
+  resolutionDetails?: string;
   department: string;
-  createdBy: string;
+  reporterId?: string;
+  reporterName?: string;
   assignedTo?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  resolvedAt?: Date;
+  createdAt: string;
+  updatedAt: string;
   comments: IncidentComment[];
   attachments: IncidentAttachment[];
 }
 
 export interface IncidentComment {
   id: string;
-  incidentId: string;
-  userId: string;
-  userName: string;
   content: string;
-  createdAt: Date;
+  userName?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IncidentAttachment {
   id: string;
   incidentId: string;
   fileName: string;
+  originalFileName: string;
   fileSize: number;
-  fileType: string;
+  contentType: string;
+  fileUrl: string;
+  publicId?: string;
+  uploadedAt: string;
   uploadedBy: string;
-  uploadedAt: Date;
-  url: string;
+  description?: string;
 }
 
 export interface CreateIncidentRequest {
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  category?: 'TECHNICAL_FAILURE' | 'HUMAN_ERROR' | 'EXTERNAL_FACTOR' | 'SECURITY_BREACH' | 'OTHER';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  financialImpact?: number;
+  affectedTransactions?: string;
+  customerImpactCount?: number;
+  complianceFlag?: boolean;
+  involvedSystems?: string;
+  incidentDate?: string;
   department: string;
 }
 
 export interface UpdateIncidentRequest {
   title?: string;
   description?: string;
-  status?: 'open' | 'in-progress' | 'resolved' | 'closed';
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-  assignedTo?: string;
+  status?: 'INVESTIGATING' | 'RESOLVED' | 'CLOSED';
+  severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  category?: 'TECHNICAL_FAILURE' | 'HUMAN_ERROR' | 'EXTERNAL_FACTOR' | 'SECURITY_BREACH' | 'OTHER';
+  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  financialImpact?: number;
+  affectedTransactions?: string;
+  customerImpactCount?: number;
+  complianceFlag?: boolean;
+  involvedSystems?: string;
+  department?: string;
+  resolutionDetails?: string;
 }
 
 export interface CreateCommentRequest {

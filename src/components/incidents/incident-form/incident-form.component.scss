@@ -18,6 +18,15 @@
   .form {
     padding: s.$spacing-xl;
 
+    .section-title {
+      font-size: s.$font-size-lg;
+      font-weight: s.$font-weight-semibold;
+      color: s.$gray-800;
+      margin: s.$spacing-xl 0 s.$spacing-md;
+      padding-bottom: s.$spacing-sm;
+      border-bottom: 1px solid s.$gray-200;
+    }
+
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -26,6 +35,15 @@
 
       @include s.mobile {
         grid-template-columns: 1fr;
+      }
+
+      // Three column grid for certain sections
+      &.grid-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+        
+        @include s.mobile {
+          grid-template-columns: 1fr;
+        }
       }
     }
 
@@ -39,10 +57,43 @@
         color: s.$gray-700;
         margin-bottom: s.$spacing-sm;
       }
+      
+      .error-message {
+        color: #dc2626; // Red color for error
+        font-size: s.$font-size-sm;
+        margin-top: s.$spacing-xs;
+      }
+      
+      .error-input {
+        border-color: #dc2626;
+        background-color: rgba(220, 38, 38, 0.05);
+        
+        &:focus {
+          border-color: #dc2626;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+        }
+      }
 
       textarea.form-input {
         resize: vertical;
         min-height: 120px;
+      }
+      
+      .checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-top: s.$spacing-sm;
+        
+        .form-checkbox {
+          width: 18px;
+          height: 18px;
+          margin-right: s.$spacing-sm;
+        }
+        
+        .checkbox-label {
+          font-size: s.$font-size-sm;
+          color: s.$gray-800;
+        }
       }
     }
 
