@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { IncidentService, IncidentFilter } from '../../../services/incident.service';
+import { AuthService } from '../../../services/auth.service';
+import { IncidentEditorService } from '../../../services/incident-editor.service';
 import { Incident } from '../../../models/incident.model';
 
 @Component({
@@ -90,7 +92,9 @@ export class IncidentListComponent implements OnInit {
 
   constructor(
     private incidentService: IncidentService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
+    private incidentEditorService: IncidentEditorService
   ) {
     // Setup search with debounce time
     this.searchSubject.pipe(
@@ -101,6 +105,10 @@ export class IncidentListComponent implements OnInit {
 
     // Load saved preferences
     this.loadPreferences();
+  }
+
+  get canEditIncident(): boolean {
+    return this.authService.isSupervisor();
   }
 
   ngOnInit(): void {
@@ -570,6 +578,14 @@ export class IncidentListComponent implements OnInit {
 
   // Navigate to incident detail
   viewIncident(id: string): void {
+    this.router.navigate(['/incidents', id]);
+  }
+  
+  // Navigate to incident detail and activate edit mode
+  editIncident(id: string): void {
+    // Activate edit mode through the service
+    this.incidentEditorService.activateEditMode(id);
+    // Navigate to the detail view
     this.router.navigate(['/incidents', id]);
   }
 

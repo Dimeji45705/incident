@@ -32,6 +32,16 @@
         />
       </div>
       
+      <!-- Error Message Display -->
+      <div class="error-message" *ngIf="errorMessage">
+        <div class="error-content">
+          <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="error-text">{{ errorMessage }}</span>
+        </div>
+      </div>
+      
       <div class="form-actions">
         <button type="submit" class="btn-primary w-full" [disabled]="isLoading">
           <span *ngIf="isLoading">Signing in...</span>
@@ -41,8 +51,8 @@
       
       <div class="demo-credentials">
         <p class="text-sm text-gray-600 mb-2">Demo credentials:</p>
-        <p class="text-xs text-gray-500">Admin: admin&#64;company.com / password</p>
-        <p class="text-xs text-gray-500">User: user&#64;company.com / password</p>
+        <p class="text-xs text-gray-500">Admin: adminnownow&#64;yopmail.com / Test&#64;1234%</p>
+        <p class="text-xs text-gray-500">User: oagfbaba&#64;yopmail.com/ Test&#64;1234%</p>
       </div>
     </form>
   </div>

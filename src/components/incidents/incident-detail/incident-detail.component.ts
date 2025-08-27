@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IncidentService } from '../../../services/incident.service';
 import { AuthService } from '../../../services/auth.service';
+import { IncidentEditorService } from '../../../services/incident-editor.service';
 import { Incident, CreateCommentRequest, IncidentAttachment, UpdateIncidentRequest } from '../../../models/incident.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-incident-detail',
@@ -13,7 +15,7 @@ import { Incident, CreateCommentRequest, IncidentAttachment, UpdateIncidentReque
   templateUrl: './incident-detail.component.html',
   styleUrls: ['./incident-detail.component.scss']
 })
-export class IncidentDetailComponent implements OnInit {
+export class IncidentDetailComponent implements OnInit, OnDestroy {
   incident: Incident | null = null;
   newComment: CreateCommentRequest = { content: '' };
   uploadingAttachment = false;
@@ -27,29 +29,96 @@ export class IncidentDetailComponent implements OnInit {
   incidentForm: UpdateIncidentRequest = {};
   saving = false;
   saveError = '';
+  
+  // Subscription for the editor service
+  private editorSubscription: Subscription | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private incidentService: IncidentService,
-    private authService: AuthService
+    public authService: AuthService, // Changed to public so template can access it
+    private incidentEditorService: IncidentEditorService
   ) {}
 
   ngOnInit(): void {
+    // DEBUG: Log authentication status and role information
+    console.log('Auth Status:', {
+      isAuthenticated: this.authService.isAuthenticated(),
+      isSupervisor: this.authService.isSupervisor(),
+      currentUser: this.authService.getCurrentUser(),
+      canEditIncident: this.canEditIncident
+    });
+    
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
+      // First get the incident data
       this.incidentService.getIncidentById(id).subscribe(incident => {
         this.incident = incident || null;
+        
+        // DEBUG: Log incident and edit permissions
+        console.log('Incident loaded:', {
+          incident: this.incident,
+          canEditIncident: this.canEditIncident,
+          editMode: this.editMode
+        });
+        
+        // Check for edit mode from query params (legacy support)
+        const editParam = this.route.snapshot.queryParamMap.get('edit');
+        if (editParam === 'true' && this.incident && this.canEditIncident) {
+          this.enableEditMode();
+        }
+        
+        // Subscribe to the editor service to detect edit mode changes
+        this.editorSubscription = this.incidentEditorService.editMode$.subscribe(editIncidentId => {
+          // If this incident is the one being edited and user has permission
+          if (editIncidentId === id && this.incident && this.canEditIncident) {
+            this.enableEditMode();
+          }
+        });
+        
+        // Check if this incident is already in edit mode
+        if (this.incidentEditorService.isInEditMode(id) && this.canEditIncident) {
+          this.enableEditMode();
+        }
       });
+    }
+  }
+  
+  ngOnDestroy(): void {
+    // Clean up subscription to prevent memory leaks
+    if (this.editorSubscription) {
+      this.editorSubscription.unsubscribe();
+      this.editorSubscription = null;
+    }
+    
+    // If we're leaving the component and in edit mode, clear the edit mode state
+    if (this.incident && this.editMode) {
+      this.incidentEditorService.deactivateEditMode();
     }
   }
 
   get canUpdateStatus(): boolean {
-    return this.authService.isSupervisor();
+    // Make sure user is authenticated AND has supervisor/admin role
+    return this.authService.isAuthenticated() && this.authService.isSupervisor();
   }
   
   get canEditIncident(): boolean {
-    return this.authService.isSupervisor();
+    // Make sure user is authenticated AND has supervisor/admin role
+    const isAuth = this.authService.isAuthenticated();
+    const isAdmin = this.authService.isAdmin();
+    const isSupervisor = this.authService.isSupervisor();
+    const canEdit = isAuth && (isAdmin || isSupervisor);
+    
+    console.log('DEBUG - canEditIncident check:', {
+      isAuthenticated: isAuth,
+      isAdmin: isAdmin,
+      isSupervisor: isSupervisor,
+      canEdit: canEdit,
+      currentUser: this.authService.getCurrentUser()
+    });
+    
+    return canEdit;
   }
 
   updateStatus(status: string): void {

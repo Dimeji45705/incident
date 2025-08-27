@@ -36,6 +36,33 @@
     }
   }
   
+  .error-message {
+    margin-bottom: s.$spacing-lg;
+    
+    .error-content {
+      display: flex;
+      align-items: center;
+      padding: s.$spacing-md;
+      background-color: s.$error-light;
+      border: 1px solid s.$error-color;
+      border-radius: s.$border-radius-md;
+      color: s.$error-dark;
+      
+      .error-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: s.$spacing-sm;
+        flex-shrink: 0;
+        color: s.$error-color;
+      }
+      
+      .error-text {
+        font-size: s.$font-size-sm;
+        font-weight: s.$font-weight-medium;
+      }
+    }
+  }
+  
   .form-actions {
     margin-top: s.$spacing-xl;
     margin-bottom: s.$spacing-lg;

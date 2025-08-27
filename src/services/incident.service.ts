@@ -254,7 +254,7 @@ export class IncidentService {
    * Update an existing incident
    */
   updateIncident(id: string, request: UpdateIncidentRequest): Observable<Incident> {
-    return this.apiService.put<Incident>(`${this.apiUrl}/${id}`, request).pipe(
+    return this.apiService.patch<Incident>(`${this.apiUrl}/${id}`, request).pipe(
       tap(updatedIncident => {
         const incidents = this.incidentsSubject.getValue();
         const index = incidents.findIndex(i => i.id === id);

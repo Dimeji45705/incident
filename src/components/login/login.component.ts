@@ -19,6 +19,7 @@ export class LoginComponent {
   };
   
   isLoading = false;
+  errorMessage = '';
 
   constructor(
     private authService: AuthService,
@@ -27,19 +28,42 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (!this.credentials.email || !this.credentials.password) {
+      this.errorMessage = 'Please enter both email and password.';
       return;
     }
 
     this.isLoading = true;
+    this.errorMessage = '';
     
     this.authService.login(this.credentials).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.router.navigate(['/incidents']);
+        
+        // Add debugging information
+        console.log('Login Success:', {
+          user: response.user,
+          tokenReceived: !!response.token,
+          isSupervisor: response.user.isSupervisor,
+          role: response.user.role
+        });
+        
+        // Navigate to auth debug page first to verify credentials
+        this.router.navigate(['/auth-debug']);
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Login failed:', error);
+        
+        // Handle different types of login errors
+        if (error.status === 401) {
+          this.errorMessage = 'Invalid email or password. Please try again.';
+        } else if (error.status === 403) {
+          this.errorMessage = 'Account is disabled. Please contact your administrator.';
+        } else if (error.status === 0) {
+          this.errorMessage = 'Unable to connect to server. Please check your internet connection.';
+        } else {
+          this.errorMessage = 'Login failed. Please try again later.';
+        }
       }
     });
   }

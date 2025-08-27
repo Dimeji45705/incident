@@ -32,6 +32,23 @@
     .status-select {
       min-width: 150px;
     }
+    
+    .permission-indicator {
+      .permission-badge {
+        display: flex;
+        align-items: center;
+        padding: s.$spacing-xs s.$spacing-sm;
+        background-color: s.$gray-100;
+        border-radius: s.$border-radius-sm;
+        font-size: s.$font-size-xs;
+        font-weight: s.$font-weight-medium;
+        color: s.$gray-600;
+        
+        svg {
+          color: s.$gray-500;
+        }
+      }
+    }
   }
 
   .incident-content {

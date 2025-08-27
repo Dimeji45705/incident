@@ -10,14 +10,37 @@
       <h1 class="page-title">{{ incident.number }} - {{ editMode ? incidentForm.title : incident.title }}</h1>
     </div>
     <div class="header-actions">
-      <!-- Edit mode actions -->
-      <div class="edit-actions" *ngIf="editMode && canEditIncident">
+      <!-- Edit mode actions - show edit button when not in edit mode -->
+      <div class="edit-actions" *ngIf="!editMode && canEditIncident">
         <button (click)="enableEditMode()" class="btn-primary">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
           </svg>
           Edit Incident
         </button>
+      </div>
+      <!-- Permission indicator when user cannot edit -->
+      <div class="permission-indicator" *ngIf="!editMode && !canEditIncident && authService.isAuthenticated()">
+        <span class="permission-badge">
+          <svg width="30" height="30" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          View-only mode
+        </span>
+      </div>
+      
+      <!-- Debug info (only visible in development) -->
+      <div class="debug-info" *ngIf="!editMode" style="background: #f0f8ff; padding: 8px; border: 1px solid #ccc; margin-top: 8px; font-size: 12px;">
+        <h4 style="margin: 0 0 5px 0;">🔍 Auth Debug:</h4>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div>• Is Authenticated: <strong>{{authService.isAuthenticated()}}</strong></div>
+          <div>• Is Supervisor: <strong>{{authService.isSupervisor()}}</strong></div>
+          <div>• Can Edit: <strong>{{canEditIncident}}</strong></div>
+          <div>• Edit Condition: <code>!editMode && canEditIncident</code> = <strong>{{!editMode && canEditIncident}}</strong></div>
+          <div *ngIf="authService.getCurrentUser()">
+            • User Role: <strong>{{authService.getCurrentUser()?.role}}</strong>
+          </div>
+        </div>
       </div>
       
       <!-- Save/Cancel buttons in edit mode -->

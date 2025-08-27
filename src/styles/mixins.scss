@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'variables' as v;
 
 // Button Mixins
@@ -41,11 +42,11 @@
   @include button-base;
   background-color: v.$secondary-color;
   color: v.$gray-900;
-  border-color: darken(v.$secondary-color, 10%);
+  border-color: color.adjust(v.$secondary-color, $lightness: -10%);
   
   &:hover:not(:disabled) {
-    background-color: darken(v.$secondary-color, 5%);
-    border-color: darken(v.$secondary-color, 15%);
+    background-color: color.adjust(v.$secondary-color, $lightness: -5%);
+    border-color: color.adjust(v.$secondary-color, $lightness: -15%);
   }
   
   &:focus {
@@ -60,7 +61,7 @@
   color: v.$white;
   
   &:hover:not(:disabled) {
-    background-color: darken(v.$success-color, 10%);
+    background-color: color.adjust(v.$success-color, $lightness: -10%);
   }
 }
 
@@ -70,7 +71,7 @@
   color: v.$white;
   
   &:hover:not(:disabled) {
-    background-color: darken(v.$warning-color, 10%);
+    background-color: color.adjust(v.$warning-color, $lightness: -10%);
   }
 }
 
@@ -80,7 +81,7 @@
   color: v.$white;
   
   &:hover:not(:disabled) {
-    background-color: darken(v.$error-color, 10%);
+    background-color: color.adjust(v.$error-color, $lightness: -10%);
   }
 }
 

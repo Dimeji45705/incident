@@ -2,7 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'supervisor' | 'user';
+  role: 'admin' | 'supervisor' | 'user' | 'EMPLOYEE';
   primaryDepartment: string;
   additionalDepartments: string[];
   isActive: boolean;
@@ -16,7 +16,7 @@ export interface CreateUserRequest {
   name: string;
   primaryDepartment: string;
   additionalDepartments: string[];
-  role: 'admin' | 'supervisor' | 'user';
+  role: 'admin' | 'supervisor' | 'user' | 'EMPLOYEE';
   isSupervisor: boolean;
 }
 
