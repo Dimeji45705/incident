@@ -1,22 +1,37 @@
 <div class="user-form">
   <div class="page-header">
     <h1 class="page-title">{{ isEdit ? 'Edit' : 'Create' }} User</h1>
+    <button (click)="cancel()" class="btn-secondary">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Users
+    </button>
+  </div>
+  
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error mb-4">
+    {{ errorMessage }}
+    <button (click)="errorMessage = ''" class="alert-close">&times;</button>
   </div>
   
   <div class="card">
-    <form (ngSubmit)="onSubmit()" class="form">
+    <form (ngSubmit)="onSubmit()" class="form" #userForm="ngForm">
       <div class="form-grid">
         <div class="form-group">
-          <label for="name" class="form-label">Full Name *</label>
+          <label for="name">Full Name *</label>
           <input
             type="text"
             id="name"
-            name="name"
             [(ngModel)]="user.name"
-            class="form-input"
-            placeholder="Enter full name"
+            name="name"
             required
+            class="form-input"
+            [class.form-input-error]="!user.name.trim() && userForm.submitted"
           />
+          <div *ngIf="!user.name.trim() && userForm.submitted" class="error-message">
+            Full name is required
+          </div>
         </div>
         
         <div class="form-group">
@@ -27,9 +42,17 @@
             name="email"
             [(ngModel)]="user.email"
             class="form-input"
+            [class.form-input-error]="(!user.email.trim() || !isValidEmail(user.email)) && userForm.submitted"
             placeholder="Enter email address"
             required
+            [readonly]="isEdit"
           />
+          <div *ngIf="!user.email.trim() && userForm.submitted" class="form-error">
+            Email is required
+          </div>
+          <div *ngIf="user.email.trim() && !isValidEmail(user.email) && userForm.submitted" class="form-error">
+            Please enter a valid email address
+          </div>
         </div>
         
         <div class="form-group">
@@ -39,13 +62,15 @@
             name="role"
             [(ngModel)]="user.role"
             class="form-input"
+            [class.form-input-error]="!user.role && userForm.submitted"
             required
           >
             <option value="">Select role</option>
-            <option value="user">User</option>
-            <option value="supervisor">Supervisor</option>
-            <option value="admin">Admin</option>
+            <option *ngFor="let role of roles" [value]="role.value">{{ role.label }}</option>
           </select>
+          <div *ngIf="!user.role && userForm.submitted" class="form-error">
+            Role is required
+          </div>
         </div>
         
         <div class="form-group">
@@ -55,45 +80,49 @@
             name="primaryDepartment"
             [(ngModel)]="user.primaryDepartment"
             class="form-input"
+            [class.form-input-error]="!user.primaryDepartment && userForm.submitted"
             required
           >
             <option value="">Select department</option>
-            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+            <option *ngFor="let dept of departments" [value]="dept">
+              {{ getDepartmentDisplayName(dept) }}
+            </option>
           </select>
+          <div *ngIf="!user.primaryDepartment && userForm.submitted" class="form-error">
+            Primary department is required
+          </div>
         </div>
       </div>
       
       <div class="form-group">
         <label class="form-label">Additional Departments</label>
-        <div class="checkbox-group">
-          <label *ngFor="let dept of departments" class="checkbox-item">
+        <p class="form-description">Select departments this user can access in addition to their primary department.</p>
+        <div class="checkbox-grid">
+          <label *ngFor="let dept of departments" 
+                 class="checkbox-item"
+                 [class.disabled]="dept === user.primaryDepartment">
             <input
               type="checkbox"
               [value]="dept"
-              [checked]="user.additionalDepartments.includes(dept)"
+              [checked]="isDepartmentSelected(dept)"
+              [disabled]="dept === user.primaryDepartment"
               (change)="onDepartmentChange(dept, $event)"
               class="checkbox-input"
             />
-            <span class="checkbox-label">{{ dept }}</span>
+            <span class="checkbox-label">{{ getDepartmentDisplayName(dept) }}</span>
+            <span *ngIf="dept === user.primaryDepartment" class="text-muted">(Primary)</span>
           </label>
         </div>
       </div>
       
-      <div class="form-group">
-        <label class="checkbox-item supervisor-checkbox">
-          <input
-            type="checkbox"
-            [(ngModel)]="user.isSupervisor"
-            name="isSupervisor"
-            class="checkbox-input"
-          />
-          <span class="checkbox-label">Is Supervisor</span>
-        </label>
-      </div>
-      
       <div class="form-actions">
-        <button type="button" (click)="cancel()" class="btn-secondary">Cancel</button>
-        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+        <button type="button" (click)="cancel()" class="btn-secondary" [disabled]="isSubmitting">
+          Cancel
+        </button>
+        <button type="submit" 
+                class="btn-primary" 
+                [disabled]="isSubmitting || !isFormValid()">
+          <div *ngIf="isSubmitting" class="loading-spinner-sm"></div>
           <span *ngIf="isSubmitting">{{ isEdit ? 'Updating...' : 'Creating...' }}</span>
           <span *ngIf="!isSubmitting">{{ isEdit ? 'Update' : 'Create' }} User</span>
         </button>

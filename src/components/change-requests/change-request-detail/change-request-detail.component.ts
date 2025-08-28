@@ -32,36 +32,50 @@ export class ChangeRequestDetailComponent implements OnInit {
   }
 
   get canEdit(): boolean {
-    return this.changeRequest?.status === 'pending' && this.authService.isSupervisor();
+    return this.changeRequest?.status === 'PENDING' && this.authService.isSupervisor();
   }
 
   get canApprove(): boolean {
-    return this.changeRequest?.status === 'pending' && this.authService.isSupervisor();
+    return this.changeRequest?.status === 'PENDING' && this.authService.isSupervisor();
   }
 
-  get canReject(): boolean {
-    return this.changeRequest?.status === 'pending' && this.authService.isSupervisor();
-  }
 
   get canComplete(): boolean {
-    return this.changeRequest?.status === 'approved' && this.authService.isSupervisor();
+    return this.changeRequest?.status === 'APPROVED' && this.authService.isSupervisor();
   }
 
   approveChangeRequest(): void {
     if (this.changeRequest) {
-      this.changeRequestService.approveChangeRequest(this.changeRequest.id).subscribe();
+      const approvalNotes = prompt('Enter approval notes:', 'Approved for implementation - low risk change');
+      if (approvalNotes !== null) {
+        this.changeRequestService.approveChangeRequest(this.changeRequest.id, approvalNotes).subscribe({
+          next: (updatedCr) => {
+            this.changeRequest = updatedCr;
+            alert('Change request approved successfully!');
+          },
+          error: (error) => {
+            alert(`Failed to approve change request: ${error.message}`);
+          }
+        });
+      }
     }
   }
 
-  rejectChangeRequest(): void {
-    if (this.changeRequest) {
-      this.changeRequestService.rejectChangeRequest(this.changeRequest.id).subscribe();
-    }
-  }
 
   completeChangeRequest(): void {
     if (this.changeRequest) {
-      this.changeRequestService.completeChangeRequest(this.changeRequest.id).subscribe();
+      const completionNotes = prompt('Enter completion notes:', 'Change request completed successfully');
+      if (completionNotes !== null) {
+        this.changeRequestService.completeChangeRequest(this.changeRequest.id, completionNotes).subscribe({
+          next: (updatedCr) => {
+            this.changeRequest = updatedCr;
+            alert('Change request marked as completed!');
+          },
+          error: (error) => {
+            alert(`Failed to complete change request: ${error.message}`);
+          }
+        });
+      }
     }
   }
 

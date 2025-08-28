@@ -20,11 +20,6 @@
               *ngIf="canApprove">
         Approve
       </button>
-      <button (click)="rejectChangeRequest()" 
-              class="btn-danger" 
-              *ngIf="canReject">
-        Reject
-      </button>
       <button (click)="completeChangeRequest()" 
               class="btn-primary" 
               *ngIf="canComplete">
@@ -46,11 +41,11 @@
           </div>
           <div class="info-item">
             <label>Department</label>
-            <span>{{ changeRequest.department }}</span>
+            <span>{{ changeRequest.assignedDepartment }}</span>
           </div>
           <div class="info-item">
             <label>Created By</label>
-            <span>{{ changeRequest.createdByName }}</span>
+            <span>{{ changeRequest.createdBy }}</span>
           </div>
           <div class="info-item">
             <label>Created</label>
@@ -58,7 +53,7 @@
           </div>
           <div class="info-item" *ngIf="changeRequest.approvedBy">
             <label>Approved By</label>
-            <span>{{ changeRequest.approvedByName }}</span>
+            <span>{{ changeRequest.approvedBy }}</span>
           </div>
           <div class="info-item" *ngIf="changeRequest.approvedAt">
             <label>Approved</label>
@@ -79,19 +74,14 @@
       <div class="card details-section">
         <h2 class="section-title">Change Details</h2>
         
-        <div class="detail-item">
-          <h3>Justification</h3>
-          <p>{{ changeRequest.justification }}</p>
+        <div class="detail-item" *ngIf="changeRequest.incidentId">
+          <h3>Related Incident</h3>
+          <p>{{ changeRequest.incidentId }}</p>
         </div>
         
-        <div class="detail-item">
-          <h3>Impact Assessment</h3>
-          <p>{{ changeRequest.impact }}</p>
-        </div>
-        
-        <div class="detail-item">
-          <h3>Rollback Plan</h3>
-          <p>{{ changeRequest.rollbackPlan }}</p>
+        <div class="detail-item" *ngIf="changeRequest.notes">
+          <h3>Notes</h3>
+          <p>{{ changeRequest.notes }}</p>
         </div>
       </div>
     </div>
@@ -106,7 +96,7 @@
             <div class="timeline-content">
               <span class="timeline-title">Created</span>
               <span class="timeline-date">{{ changeRequest.createdAt | date:'short' }}</span>
-              <span class="timeline-user">by {{ changeRequest.createdByName }}</span>
+              <span class="timeline-user">by {{ changeRequest.createdBy }}</span>
             </div>
           </div>
           
@@ -115,7 +105,7 @@
             <div class="timeline-content">
               <span class="timeline-title">Approved</span>
               <span class="timeline-date">{{ changeRequest.approvedAt | date:'short' }}</span>
-              <span class="timeline-user" *ngIf="changeRequest.approvedByName">by {{ changeRequest.approvedByName }}</span>
+              <span class="timeline-user" *ngIf="changeRequest.approvedBy">by {{ changeRequest.approvedBy }}</span>
             </div>
           </div>
           

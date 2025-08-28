@@ -1,51 +1,73 @@
-@use "../../../styles" as s;
-
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .user-form {
   max-width: 800px;
 
   .page-header {
-    margin-bottom: s.$spacing-lg;
+    margin-bottom: $spacing-lg;
 
     .page-title {
-      font-size: s.$font-size-2xl;
-      font-weight: s.$font-weight-bold;
-      color: s.$gray-900;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $gray-900;
       margin: 0;
     }
   }
 
-  .form {
-    padding: s.$spacing-xl;
+  .card {
+    @include card;
+    padding: $spacing-xl;
+  }
 
+  .form {
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: s.$spacing-lg;
-      margin-bottom: s.$spacing-lg;
+      gap: $spacing-lg;
+      margin-bottom: $spacing-lg;
 
-      @include s.mobile {
+      @include mobile {
         grid-template-columns: 1fr;
       }
     }
 
     .form-group {
-      margin-bottom: s.$spacing-lg;
+      margin-bottom: $spacing-lg;
 
       .form-label {
         display: block;
-        font-size: s.$font-size-sm;
-        font-weight: s.$font-weight-medium;
-        color: s.$gray-700;
-        margin-bottom: s.$spacing-sm;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $gray-700;
+        margin-bottom: $spacing-sm;
+      }
+
+      .form-input, .form-select {
+        @include form-input;
+      }
+
+      .form-input-error {
+        border-color: $error-color;
+        
+        &:focus {
+          border-color: $error-color;
+          box-shadow: 0 0 0 3px rgba($error-color, 0.1);
+        }
+      }
+
+      .form-error {
+        color: $error-color;
+        font-size: $font-size-xs;
+        margin-top: $spacing-xs;
       }
 
       .checkbox-group {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: s.$spacing-sm;
+        gap: $spacing-sm;
 
-        @include s.mobile {
+        @include mobile {
           grid-template-columns: 1fr;
         }
       }
@@ -53,34 +75,34 @@
       .checkbox-item {
         display: flex;
         align-items: center;
-        gap: s.$spacing-sm;
+        gap: $spacing-sm;
         cursor: pointer;
 
         .checkbox-input {
           width: 16px;
           height: 16px;
-          accent-color: s.$primary-color;
+          accent-color: $primary-color;
         }
 
         .checkbox-label {
-          font-size: s.$font-size-sm;
-          color: s.$gray-700;
+          font-size: $font-size-sm;
+          color: $gray-700;
           user-select: none;
         }
 
         &:hover .checkbox-label {
-          color: s.$gray-900;
+          color: $gray-900;
         }
       }
 
       .supervisor-checkbox {
-        padding: s.$spacing-md;
-        border: 1px solid s.$gray-200;
-        border-radius: s.$border-radius-md;
-        background-color: s.$gray-50;
+        padding: $spacing-md;
+        border: 1px solid $gray-200;
+        border-radius: $border-radius-md;
+        background-color: $gray-50;
 
         .checkbox-label {
-          font-weight: s.$font-weight-medium;
+          font-weight: $font-weight-medium;
         }
       }
     }
@@ -88,13 +110,79 @@
     .form-actions {
       display: flex;
       justify-content: flex-end;
-      gap: s.$spacing-md;
-      padding-top: s.$spacing-lg;
-      border-top: 1px solid s.$gray-200;
+      gap: $spacing-md;
+      padding-top: $spacing-lg;
+      border-top: 1px solid $gray-200;
 
-      @include s.mobile {
+      @include mobile {
         flex-direction: column-reverse;
+      }
+
+      .btn {
+        @include button-base;
+      }
+
+      .btn-primary {
+        @include button-primary;
+      }
+
+      .btn-secondary {
+        @include button-secondary;
       }
     }
   }
+
+  .alert {
+    padding: $spacing-md $spacing-lg;
+    border-radius: $border-radius-md;
+    margin-bottom: $spacing-lg;
+    position: relative;
+
+    &.alert-error {
+      background-color: $error-light;
+      border: 1px solid rgba($error-color, 0.2);
+      color: $error-dark;
+    }
+
+    .alert-close {
+      position: absolute;
+      top: $spacing-sm;
+      right: $spacing-md;
+      background: none;
+      border: none;
+      font-size: $font-size-lg;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: $spacing-3xl;
+
+    .loading-spinner {
+      width: 2rem;
+      height: 2rem;
+      border: 3px solid $gray-200;
+      border-top: 3px solid $primary-color;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto $spacing-lg;
+    }
+
+    p {
+      color: $gray-600;
+      margin: 0;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

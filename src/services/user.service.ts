@@ -1,131 +1,141 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { User, CreateUserRequest } from '../models/user.model';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { User, CreateUserRequest, UpdateUserRequest, UserPageResponse, UserFilter } from '../models/user.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private usersSubject = new BehaviorSubject<User[]>([]);
-  public users$ = this.usersSubject.asObservable();
+  private apiUrl = `${environment.apiUrl}/users`;
 
-  private mockUsers: User[] = [
-    {
-      id: '1',
-      email: 'admin@company.com',
-      name: 'Admin User',
-      role: 'admin',
-      primaryDepartment: 'IT',
-      additionalDepartments: ['Security', 'Administration'],
-      isActive: true,
-      isSupervisor: true,
-      createdAt: new Date('2024-01-01T00:00:00'),
-      updatedAt: new Date('2024-01-01T00:00:00')
-    },
-    {
-      id: '2',
-      email: 'john.smith@company.com',
-      name: 'John Smith',
-      role: 'supervisor',
-      primaryDepartment: 'IT',
-      additionalDepartments: [],
-      isActive: true,
-      isSupervisor: true,
-      createdAt: new Date('2024-01-02T00:00:00'),
-      updatedAt: new Date('2024-01-02T00:00:00')
-    },
-    {
-      id: '3',
-      email: 'jane.doe@company.com',
-      name: 'Jane Doe',
-      role: 'user',
-      primaryDepartment: 'Security',
-      additionalDepartments: ['IT'],
-      isActive: true,
-      isSupervisor: false,
-      createdAt: new Date('2024-01-03T00:00:00'),
-      updatedAt: new Date('2024-01-03T00:00:00')
-    },
-    {
-      id: '4',
-      email: 'bob.johnson@company.com',
-      name: 'Bob Johnson',
-      role: 'user',
-      primaryDepartment: 'Administration',
-      additionalDepartments: [],
-      isActive: true,
-      isSupervisor: false,
-      createdAt: new Date('2024-01-04T00:00:00'),
-      updatedAt: new Date('2024-01-04T00:00:00')
-    },
-    {
-      id: '5',
-      email: 'sarah.wilson@company.com',
-      name: 'Sarah Wilson',
-      role: 'user',
-      primaryDepartment: 'HR',
-      additionalDepartments: ['Administration'],
-      isActive: false,
-      isSupervisor: false,
-      createdAt: new Date('2024-01-05T00:00:00'),
-      updatedAt: new Date('2024-01-15T00:00:00')
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Get users with pagination, sorting, and filtering
+   */
+  getUsers(
+    page: number = 0,
+    size: number = 20,
+    sort: string = 'createdAt',
+    direction: 'asc' | 'desc' = 'desc',
+    filter?: UserFilter
+  ): Observable<UserPageResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+
+    if (filter?.active !== undefined) {
+      params = params.set('active', filter.active.toString());
     }
-  ];
-
-  constructor() {
-    this.usersSubject.next(this.mockUsers);
-  }
-
-  getUsers(): Observable<User[]> {
-    return this.users$;
-  }
-
-  getUserById(id: string): Observable<User | undefined> {
-    const user = this.mockUsers.find(u => u.id === id);
-    return of(user);
-  }
-
-  createUser(request: CreateUserRequest): Observable<User> {
-    const newUser: User = {
-      id: Date.now().toString(),
-      email: request.email,
-      name: request.name,
-      role: request.role,
-      primaryDepartment: request.primaryDepartment,
-      additionalDepartments: request.additionalDepartments,
-      isActive: true,
-      isSupervisor: request.isSupervisor,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    this.mockUsers.push(newUser);
-    this.usersSubject.next([...this.mockUsers]);
     
-    return of(newUser);
-  }
-
-  updateUser(id: string, updates: Partial<User>): Observable<User> {
-    const index = this.mockUsers.findIndex(u => u.id === id);
-    if (index !== -1) {
-      this.mockUsers[index] = {
-        ...this.mockUsers[index],
-        ...updates,
-        updatedAt: new Date()
-      };
-      this.usersSubject.next([...this.mockUsers]);
-      return of(this.mockUsers[index]);
+    if (filter?.role) {
+      params = params.set('role', filter.role);
     }
-    throw new Error('User not found');
+    
+    if (filter?.primaryDepartment) {
+      params = params.set('primaryDepartment', filter.primaryDepartment);
+    }
+    
+    if (filter?.searchTerm) {
+      params = params.set('search', filter.searchTerm);
+    }
+
+    return this.http.get<UserPageResponse>(this.apiUrl, { params })
+      .pipe(
+        catchError(this.handleError.bind(this))
+      );
   }
 
+  /**
+   * Get user by ID
+   */
+  getUserById(id: string): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/${id}`)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      );
+  }
+
+  /**
+   * Create new user
+   */
+  createUser(request: CreateUserRequest): Observable<User> {
+    return this.http.post<User>(this.apiUrl, request)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      );
+  }
+
+  /**
+   * Update user
+   */
+  updateUser(id: string, updates: UpdateUserRequest): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/${id}`, updates)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      );
+  }
+
+  /**
+   * Delete user (deactivate)
+   */
   deleteUser(id: string): Observable<void> {
-    const index = this.mockUsers.findIndex(u => u.id === id);
-    if (index !== -1) {
-      this.mockUsers.splice(index, 1);
-      this.usersSubject.next([...this.mockUsers]);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+      .pipe(
+        catchError(this.handleError.bind(this))
+      );
+  }
+
+  /**
+   * Toggle user active status
+   */
+  toggleUserStatus(id: string, active: boolean): Observable<User> {
+    return this.updateUser(id, { active });
+  }
+
+  /**
+   * Error handling
+   */
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unexpected error occurred';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      switch (error.status) {
+        case 400:
+          errorMessage = 'Invalid user data provided';
+          break;
+        case 401:
+          errorMessage = 'You are not authorized to perform this action';
+          break;
+        case 403:
+          errorMessage = 'You do not have permission to manage users';
+          break;
+        case 404:
+          errorMessage = 'User not found';
+          break;
+        case 409:
+          errorMessage = 'A user with this email already exists';
+          break;
+        case 500:
+          errorMessage = 'Server error occurred while processing your request';
+          break;
+        default:
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          }
+      }
     }
-    return of();
+    
+    return throwError(() => ({ message: errorMessage, status: error.status }));
   }
 
   getDepartments(): Observable<string[]> {

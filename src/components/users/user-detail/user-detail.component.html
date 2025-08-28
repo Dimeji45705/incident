@@ -1,0 +1,190 @@
+<div class="user-detail">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">User Details</h1>
+      <button routerLink="/users" class="btn-secondary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Users
+      </button>
+    </div>
+  </div>
+  
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error mb-4">
+    {{ errorMessage }}
+    <button (click)="errorMessage = ''" class="alert-close">&times;</button>
+  </div>
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading user details...</p>
+  </div>
+  
+  <!-- User Details -->
+  <div *ngIf="!isLoading && user" class="user-content">
+    <!-- User Header Card -->
+    <div class="card user-header">
+      <div class="user-header-content">
+        <div class="user-avatar">
+          <div class="avatar-circle">
+            {{ user.name.charAt(0).toUpperCase() }}
+          </div>
+        </div>
+        
+        <div class="user-basic-info">
+          <h2 class="user-name">{{ user.name }}</h2>
+          <p class="user-email">{{ user.email }}</p>
+          <div class="user-badges">
+            <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+              {{ getRoleDisplayName(user.role) }}
+            </span>
+            <span class="status-badge" [ngClass]="getStatusBadgeClass(user.active)">
+              {{ user.active ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="user-actions" *ngIf="canManageUsers()">
+          <a [routerLink]="['/users', user.id, 'edit']" 
+             class="btn-primary"
+             *ngIf="canEditUser()">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Edit User
+          </a>
+          
+          <button (click)="toggleUserStatus()" 
+                  class="btn-sm"
+                  [ngClass]="user.active ? 'btn-warning' : 'btn-success'">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    [attr.d]="user.active ? 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636' : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'"/>
+            </svg>
+            {{ user.active ? 'Deactivate' : 'Activate' }}
+          </button>
+          
+          <button (click)="deleteUser()" class="btn-danger btn-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- User Information Cards -->
+    <div class="user-details-grid">
+      <!-- Basic Information -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Basic Information</h3>
+        </div>
+        <div class="card-content">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="info-label">Full Name</label>
+              <span class="info-value">{{ user.name }}</span>
+            </div>
+            
+            <div class="info-item">
+              <label class="info-label">Email Address</label>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            
+            <div class="info-item">
+              <label class="info-label">Role</label>
+              <span class="info-value">
+                <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+                  {{ getRoleDisplayName(user.role) }}
+                </span>
+              </span>
+            </div>
+            
+            <div class="info-item">
+              <label class="info-label">Account Status</label>
+              <span class="info-value">
+                <span class="status-badge" [ngClass]="getStatusBadgeClass(user.active)">
+                  {{ user.active ? 'Active' : 'Inactive' }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Department Information -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Department Access</h3>
+        </div>
+        <div class="card-content">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="info-label">Primary Department</label>
+              <span class="info-value">
+                <span class="department-badge primary">
+                  {{ getDepartmentDisplayName(user.primaryDepartment) }}
+                </span>
+              </span>
+            </div>
+            
+            <div class="info-item">
+              <label class="info-label">Additional Departments</label>
+              <div class="info-value">
+                <div *ngIf="user.additionalDepartments && user.additionalDepartments.length > 0" class="department-list">
+                  <span *ngFor="let dept of user.additionalDepartments" class="department-badge">
+                    {{ getDepartmentDisplayName(dept) }}
+                  </span>
+                </div>
+                <span *ngIf="!user.additionalDepartments || user.additionalDepartments.length === 0" class="text-muted">
+                  None
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Account Timeline -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Account Timeline</h3>
+        </div>
+        <div class="card-content">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker created"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Account Created</div>
+                <div class="timeline-date">{{ user.createdAt | date:'MMM d, y \'at\' h:mm a' }}</div>
+              </div>
+            </div>
+            
+            <div class="timeline-item" *ngIf="user.updatedAt !== user.createdAt">
+              <div class="timeline-marker updated"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Last Updated</div>
+                <div class="timeline-date">{{ user.updatedAt | date:'MMM d, y \'at\' h:mm a' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- No User Found State -->
+  <div *ngIf="!isLoading && !user" class="empty-state">
+    <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <h3>User Not Found</h3>
+    <p>The user you're looking for doesn't exist or has been removed.</p>
+    <a routerLink="/users" class="btn-primary">Back to Users</a>
+  </div>
+</div>

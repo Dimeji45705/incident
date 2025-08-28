@@ -1,141 +1,176 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { ChangeRequest, CreateChangeRequestRequest, UpdateChangeRequestRequest } from '../models/change-request.model';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, map, catchError, throwError } from 'rxjs';
+import { ChangeRequest, CreateChangeRequestRequest, UpdateChangeRequestRequest, ApiChangeRequest, ChangeRequestPageResponse, ChangeRequestFilter } from '../models/change-request.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChangeRequestService {
-  private changeRequestsSubject = new BehaviorSubject<ChangeRequest[]>([]);
-  public changeRequests$ = this.changeRequestsSubject.asObservable();
+  private apiUrl = `${environment.apiUrl}/change-requests`;
 
-  private mockChangeRequests: ChangeRequest[] = [
-    {
-      id: '1',
-      number: 'CR-001',
-      title: 'Upgrade database server',
-      description: 'Upgrade the main database server to the latest version for improved performance and security',
-      status: 'pending',
-      department: 'IT',
-      createdBy: 'user1',
-      createdByName: 'John Smith',
-      createdAt: new Date('2024-01-15T09:00:00'),
-      updatedAt: new Date('2024-01-15T09:00:00'),
-      justification: 'Current version has known security vulnerabilities and performance issues',
-      impact: 'System will be offline for 2-3 hours during upgrade window',
-      rollbackPlan: 'Database backup will be taken before upgrade. Can restore from backup if issues occur'
-    },
-    {
-      id: '2',
-      number: 'CR-002',
-      title: 'Install new firewall rules',
-      description: 'Add new firewall rules to block suspicious traffic patterns',
-      status: 'approved',
-      department: 'Security',
-      createdBy: 'user2',
-      createdByName: 'Jane Doe',
-      approvedBy: 'admin1',
-      approvedByName: 'Admin User',
-      createdAt: new Date('2024-01-14T14:30:00'),
-      updatedAt: new Date('2024-01-15T08:45:00'),
-      approvedAt: new Date('2024-01-15T08:45:00'),
-      justification: 'Recent security audit identified potential vulnerabilities',
-      impact: 'No downtime expected, rules will be applied during maintenance window',
-      rollbackPlan: 'Previous firewall configuration backed up and can be restored immediately'
-    },
-    {
-      id: '3',
-      number: 'CR-003',
-      title: 'Update office software licenses',
-      description: 'Renew and update office software licenses for all departments',
-      status: 'completed',
-      department: 'Administration',
-      createdBy: 'user3',
-      createdByName: 'Bob Johnson',
-      approvedBy: 'admin1',
-      approvedByName: 'Admin User',
-      createdAt: new Date('2024-01-10T10:15:00'),
-      updatedAt: new Date('2024-01-13T16:20:00'),
-      approvedAt: new Date('2024-01-11T09:30:00'),
-      completedAt: new Date('2024-01-13T16:20:00'),
-      justification: 'Current licenses expire at end of month',
-      impact: 'Users may experience brief interruption during license activation',
-      rollbackPlan: 'Previous license keys documented and can be reactivated if needed'
+  constructor(private http: HttpClient) {}
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'An unexpected error occurred';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      switch (error.status) {
+        case 400:
+          errorMessage = error.error?.message || 'Bad Request: Please check your input';
+          break;
+        case 401:
+          errorMessage = 'Unauthorized: Please log in again';
+          break;
+        case 403:
+          errorMessage = 'Forbidden: You do not have permission to perform this action';
+          break;
+        case 404:
+          errorMessage = 'Not Found: The requested change request could not be found';
+          break;
+        case 409:
+          errorMessage = error.error?.message || 'Conflict: The change request cannot be processed in its current state';
+          break;
+        case 422:
+          errorMessage = error.error?.message || 'Validation Error: Please check your input fields';
+          break;
+        case 500:
+          errorMessage = 'Internal Server Error: Please try again later';
+          break;
+        default:
+          errorMessage = error.error?.message || `Error ${error.status}: ${error.statusText}`;
+      }
     }
-  ];
-
-  constructor() {
-    this.changeRequestsSubject.next(this.mockChangeRequests);
+    
+    console.error('Change Request Service Error:', error);
+    return throwError(() => new Error(errorMessage));
   }
 
-  getChangeRequests(): Observable<ChangeRequest[]> {
-    return this.changeRequests$;
+
+  getChangeRequests(
+    page: number = 0,
+    size: number = 20,
+    sort: string = 'createdAt',
+    direction: string = 'desc',
+    filter?: ChangeRequestFilter
+  ): Observable<ChangeRequestPageResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+
+    // Add filter parameters if provided
+    if (filter) {
+      if (filter.status) {
+        params = params.set('status', filter.status);
+      }
+      if (filter.assignedDepartment) {
+        params = params.set('assignedDepartment', filter.assignedDepartment);
+      }
+      if (filter.incidentId) {
+        params = params.set('incidentId', filter.incidentId);
+      }
+      if (filter.createdBy) {
+        params = params.set('createdBy', filter.createdBy);
+      }
+    }
+
+    return this.http.get<ChangeRequestPageResponse>(`${this.apiUrl}`, { params })
+      .pipe(catchError(this.handleError.bind(this)));
   }
 
-  getChangeRequestById(id: string): Observable<ChangeRequest | undefined> {
-    const changeRequest = this.mockChangeRequests.find(cr => cr.id === id);
-    return of(changeRequest);
+  getChangeRequestById(id: string): Observable<ChangeRequest> {
+    return this.http.get<ApiChangeRequest>(`${this.apiUrl}/${id}`)
+      .pipe(
+        map(this.mapApiChangeRequestToLocal),
+        catchError(this.handleError.bind(this))
+      );
   }
 
   createChangeRequest(request: CreateChangeRequestRequest): Observable<ChangeRequest> {
-    const newChangeRequest: ChangeRequest = {
-      id: Date.now().toString(),
-      number: `CR-${String(this.mockChangeRequests.length + 1).padStart(3, '0')}`,
-      title: request.title,
-      description: request.description,
-      status: 'pending',
-      department: request.department,
-      createdBy: 'current-user',
-      createdByName: 'Current User',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      justification: request.justification,
-      impact: request.impact,
-      rollbackPlan: request.rollbackPlan
-    };
-
-    this.mockChangeRequests.unshift(newChangeRequest);
-    this.changeRequestsSubject.next([...this.mockChangeRequests]);
-    
-    return of(newChangeRequest);
+    console.log('Creating change request with payload:', request);
+    return this.http.post<ApiChangeRequest>(this.apiUrl, request)
+      .pipe(
+        map(this.mapApiChangeRequestToLocal),
+        catchError(this.handleError.bind(this))
+      );
   }
 
   updateChangeRequest(id: string, request: UpdateChangeRequestRequest): Observable<ChangeRequest> {
-    const index = this.mockChangeRequests.findIndex(cr => cr.id === id);
-    if (index !== -1) {
-      this.mockChangeRequests[index] = {
-        ...this.mockChangeRequests[index],
-        ...request,
-        updatedAt: new Date(),
-        approvedAt: request.status === 'approved' ? new Date() : this.mockChangeRequests[index].approvedAt,
-        completedAt: request.status === 'completed' ? new Date() : this.mockChangeRequests[index].completedAt
-      };
-      this.changeRequestsSubject.next([...this.mockChangeRequests]);
-      return of(this.mockChangeRequests[index]);
-    }
-    throw new Error('Change request not found');
+    return this.http.put<ApiChangeRequest>(`${this.apiUrl}/${id}`, request)
+      .pipe(
+        map(this.mapApiChangeRequestToLocal),
+        catchError(this.handleError.bind(this))
+      );
   }
 
-  approveChangeRequest(id: string): Observable<ChangeRequest> {
-    return this.updateChangeRequest(id, { 
-      status: 'approved',
-    });
+  approveChangeRequest(id: string, notes?: string): Observable<ChangeRequest> {
+    const payload = {
+      notes: notes || 'Approved for implementation'
+    };
+    
+    return this.http.post<ApiChangeRequest>(`${this.apiUrl}/${id}/approve`, payload)
+      .pipe(
+        map(this.mapApiChangeRequestToLocal),
+        catchError(this.handleError.bind(this))
+      );
   }
 
-  rejectChangeRequest(id: string): Observable<ChangeRequest> {
-    return this.updateChangeRequest(id, { status: 'rejected' });
+  rejectChangeRequest(id: string, notes?: string): Observable<ChangeRequest> {
+    const payload = {
+      notes: notes || 'Change request rejected'
+    };
+    
+    return this.http.post<ApiChangeRequest>(`${this.apiUrl}/${id}/reject`, payload)
+      .pipe(
+        map(this.mapApiChangeRequestToLocal),
+        catchError(this.handleError.bind(this))
+      );
   }
 
-  completeChangeRequest(id: string): Observable<ChangeRequest> {
-    return this.updateChangeRequest(id, { status: 'completed' });
+  completeChangeRequest(id: string, notes?: string): Observable<ChangeRequest> {
+    const payload = {
+      notes: notes || 'Change request completed'
+    };
+    
+    return this.http.post<ApiChangeRequest>(`${this.apiUrl}/${id}/complete`, payload)
+      .pipe(
+        map(this.mapApiChangeRequestToLocal),
+        catchError(this.handleError.bind(this))
+      );
   }
 
   deleteChangeRequest(id: string): Observable<void> {
-    const index = this.mockChangeRequests.findIndex(cr => cr.id === id);
-    if (index !== -1) {
-      this.mockChangeRequests.splice(index, 1);
-      this.changeRequestsSubject.next([...this.mockChangeRequests]);
-    }
-    return of();
+    return this.http.delete<void>(`${this.apiUrl}/${id}`)
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Maps API change request to local change request format
+   */
+  private mapApiChangeRequestToLocal(apiChangeRequest: ApiChangeRequest): ChangeRequest {
+    return {
+      id: apiChangeRequest.id,
+      number: apiChangeRequest.number,
+      title: apiChangeRequest.title,
+      description: apiChangeRequest.description,
+      status: apiChangeRequest.status,
+      incidentId: apiChangeRequest.incidentId,
+      assignedDepartment: apiChangeRequest.assignedDepartment,
+      createdBy: apiChangeRequest.createdBy,
+      approvedBy: apiChangeRequest.approvedBy,
+      completedBy: apiChangeRequest.completedBy,
+      createdAt: apiChangeRequest.createdAt,
+      updatedAt: apiChangeRequest.updatedAt,
+      approvedAt: apiChangeRequest.approvedAt,
+      completedAt: apiChangeRequest.completedAt,
+      notes: apiChangeRequest.notes
+    };
   }
 }

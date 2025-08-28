@@ -38,17 +38,10 @@
         </button>
         <button 
           class="tab-button" 
-          [class.active]="activeTab === 'rejected'"
-          (click)="onTabChange('rejected')"
+          [class.active]="activeTab === 'completed'"
+          (click)="onTabChange('completed')"
         >
-          Rejected <span class="tab-count">({{ getStatusCount('rejected') }})</span>
-        </button>
-        <button 
-          class="tab-button" 
-          [class.active]="activeTab === 'returned'"
-          (click)="onTabChange('returned')"
-        >
-          Returned <span class="tab-count">({{ getStatusCount('returned') }})</span>
+          Completed <span class="tab-count">({{ getStatusCount('completed') }})</span>
         </button>
       </div>
       
@@ -62,8 +55,7 @@
           <option value="all">All Requests ({{ getTotalCount() }})</option>
           <option value="pending">Pending ({{ getStatusCount('pending') }})</option>
           <option value="approved">Approved ({{ getStatusCount('approved') }})</option>
-          <option value="rejected">Rejected ({{ getStatusCount('rejected') }})</option>
-          <option value="returned">Returned ({{ getStatusCount('returned') }})</option>
+          <option value="completed">Completed ({{ getStatusCount('completed') }})</option>
         </select>
       </div>
     </div>
@@ -114,11 +106,11 @@
             <td class="request-title">{{ cr.title }}</td>
             <td>
               <span class="status-pill" [ngClass]="getStatusClass(cr.status)">
-                {{ cr.status | titlecase }}
+                {{ getStatusDisplay(cr.status) }}
               </span>
             </td>
-            <td class="department">{{ cr.department }}</td>
-            <td class="created-by">{{ cr.createdByName }}</td>
+            <td class="department">{{ cr.assignedDepartment }}</td>
+            <td class="created-by">{{ cr.createdBy }}</td>
             <td class="created-date">{{ cr.createdAt | date:'MMM dd, yyyy' }}</td>
             <td class="actions-cell">
               <button 

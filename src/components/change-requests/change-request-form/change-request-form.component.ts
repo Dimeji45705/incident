@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ChangeRequestService } from '../../../services/change-request.service';
 import { UserService } from '../../../services/user.service';
+import { IncidentService } from '../../../services/incident.service';
 import { CreateChangeRequestRequest, ChangeRequest } from '../../../models/change-request.model';
+import { Incident } from '../../../models/incident.model';
 
 @Component({
   selector: 'app-change-request-form',
@@ -17,13 +19,13 @@ export class ChangeRequestFormComponent implements OnInit {
   changeRequest: CreateChangeRequestRequest = {
     title: '',
     description: '',
-    department: '',
-    justification: '',
-    impact: '',
-    rollbackPlan: ''
+    incidentId: '',
+    assignedDepartment: '',
+    notes: ''
   };
   
   departments: string[] = [];
+  resolvedIncidents: Incident[] = [];
   isSubmitting = false;
   isEdit = false;
   changeRequestId: string | null = null;
@@ -31,13 +33,20 @@ export class ChangeRequestFormComponent implements OnInit {
   constructor(
     private changeRequestService: ChangeRequestService,
     private userService: UserService,
+    private incidentService: IncidentService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Load departments
     this.userService.getDepartments().subscribe(departments => {
       this.departments = departments;
+    });
+
+    // Load resolved incidents for dropdown
+    this.incidentService.getResolvedIncidents().subscribe(incidents => {
+      this.resolvedIncidents = incidents;
     });
 
     // Check if this is an edit operation
@@ -55,10 +64,9 @@ export class ChangeRequestFormComponent implements OnInit {
           this.changeRequest = {
             title: cr.title,
             description: cr.description,
-            department: cr.department,
-            justification: cr.justification,
-            impact: cr.impact,
-            rollbackPlan: cr.rollbackPlan
+            incidentId: cr.incidentId,
+            assignedDepartment: cr.assignedDepartment,
+            notes: cr.notes || ''
           };
         }
       });
@@ -67,8 +75,7 @@ export class ChangeRequestFormComponent implements OnInit {
 
   onSubmit(): void {
     if (!this.changeRequest.title || !this.changeRequest.description || 
-        !this.changeRequest.department || !this.changeRequest.justification ||
-        !this.changeRequest.impact || !this.changeRequest.rollbackPlan) {
+        !this.changeRequest.incidentId || !this.changeRequest.assignedDepartment) {
       return;
     }
 
@@ -82,7 +89,7 @@ export class ChangeRequestFormComponent implements OnInit {
         },
         error: (error) => {
           this.isSubmitting = false;
-          console.error('Failed to update change request:', error);
+          alert(`Failed to update change request: ${error.message}`);
         }
       });
     } else {
@@ -93,7 +100,7 @@ export class ChangeRequestFormComponent implements OnInit {
         },
         error: (error) => {
           this.isSubmitting = false;
-          console.error('Failed to create change request:', error);
+          alert(`Failed to create change request: ${error.message}`);
         }
       });
     }

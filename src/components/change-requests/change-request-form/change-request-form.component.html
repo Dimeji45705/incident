@@ -21,16 +21,18 @@
         
         <div class="form-group">
           <label for="department" class="form-label">Department *</label>
-          <select
-            id="department"
-            name="department"
-            [(ngModel)]="changeRequest.department"
-            class="form-input"
-            required
-          >
-            <option value="">Select department</option>
-            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
-          </select>
+          <div class="form-select-wrapper">
+            <select
+              id="assignedDepartment"
+              name="assignedDepartment"
+              [(ngModel)]="changeRequest.assignedDepartment"
+              class="form-input"
+              required
+            >
+              <option value="">Select department</option>
+              <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
         </div>
       </div>
       
@@ -48,41 +50,32 @@
       </div>
       
       <div class="form-group">
-        <label for="justification" class="form-label">Justification *</label>
-        <textarea
-          id="justification"
-          name="justification"
-          [(ngModel)]="changeRequest.justification"
-          class="form-input"
-          rows="3"
-          placeholder="Explain why this change is necessary..."
-          required
-        ></textarea>
+        <label for="incidentId" class="form-label">Related Incident *</label>
+        <div class="form-select-wrapper">
+          <select
+            id="incidentId"
+            name="incidentId"
+            [(ngModel)]="changeRequest.incidentId"
+            class="form-input"
+            required
+          >
+            <option value="">Select a resolved incident</option>
+            <option *ngFor="let incident of resolvedIncidents" [value]="incident.id">
+              {{ incident.number }} - {{ incident.title }}
+            </option>
+          </select>
+        </div>
       </div>
       
       <div class="form-group">
-        <label for="impact" class="form-label">Impact Assessment *</label>
+        <label for="notes" class="form-label">Notes</label>
         <textarea
-          id="impact"
-          name="impact"
-          [(ngModel)]="changeRequest.impact"
+          id="notes"
+          name="notes"
+          [(ngModel)]="changeRequest.notes"
           class="form-input"
           rows="3"
-          placeholder="Describe the expected impact of this change..."
-          required
-        ></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="rollbackPlan" class="form-label">Rollback Plan *</label>
-        <textarea
-          id="rollbackPlan"
-          name="rollbackPlan"
-          [(ngModel)]="changeRequest.rollbackPlan"
-          class="form-input"
-          rows="3"
-          placeholder="Describe how to rollback if issues occur..."
-          required
+          placeholder="Additional notes or comments..."
         ></textarea>
       </div>
       

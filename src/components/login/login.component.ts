@@ -43,7 +43,6 @@ export class LoginComponent {
         console.log('Login Success:', {
           user: response.user,
           tokenReceived: !!response.token,
-          isSupervisor: response.user.isSupervisor,
           role: response.user.role
         });
         

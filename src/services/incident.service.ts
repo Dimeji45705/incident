@@ -383,4 +383,26 @@ export class IncidentService {
       })
     );
   }
+
+  /**
+   * Get resolved incidents for change request dropdown
+   */
+  getResolvedIncidents(): Observable<Incident[]> {
+    const params: Record<string, string> = {
+      status: 'RESOLVED',
+      page: '0',
+      size: '100', // Get up to 100 resolved incidents
+      sort: 'updatedAt',
+      direction: 'desc'
+    };
+    
+    return this.apiService.get<PageResponse<Incident>>(`${this.apiUrl}`, params)
+      .pipe(
+        map(response => response ? response.content : []),
+        catchError(error => {
+          console.error('Error loading resolved incidents:', error);
+          return of([]);
+        })
+      );
+  }
 }
