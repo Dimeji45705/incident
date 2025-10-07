@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "node api.js && ng serve",
+    "build": "node api.js && ng build",
     "build:prod": "ng build --configuration production"
   },
   "dependencies": {
